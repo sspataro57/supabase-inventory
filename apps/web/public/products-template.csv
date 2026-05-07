@@ -1,0 +1,11 @@
+sku,name,measure_type,display_unit,description,pack_size,reorder_point,user_can_check_in,user_can_check_out,is_archived,barcodes
+FLOUR-AP-25KG,All-Purpose Flour 25kg,mass,kg,Bleached all-purpose wheat flour,,5000,true,false,false,ean13:1234567890123
+FLOUR-WW-1KG,Whole Wheat Flour 1kg,mass,kg,Stone-ground whole wheat flour,,2000,true,false,false,
+OIL-SUNF-5L,Sunflower Oil 5L,volume,l,Refined sunflower oil,,10000,true,false,false,ean13:9876543210987
+SUGAR-WHITE-1KG,White Sugar 1kg,mass,kg,Refined white sugar,,3000,true,false,false,
+EGGS-L-TRAY,Eggs Large (30-pack),count,ea,Free-range large eggs,30,60,true,true,false,
+SALT-TABLE-1KG,Table Salt 1kg,mass,kg,Iodised table salt,,1000,true,false,false,
+MILK-UHT-1L,UHT Full-Fat Milk 1L,volume,l,Long-life full-fat milk,,20000,true,true,false,ean13:1111111111111
+BUTTER-UNSALT-250G,Unsalted Butter 250g,mass,g,European-style unsalted butter,,2500,true,false,false,
+YEAST-DRY-500G,Dry Active Yeast 500g,mass,g,Instant dry yeast,,500,true,false,false,
+PASTA-PENNE-500G,Penne Pasta 500g,mass,g,Durum wheat semolina penne,,2500,true,true,false,ean13:2222222222222

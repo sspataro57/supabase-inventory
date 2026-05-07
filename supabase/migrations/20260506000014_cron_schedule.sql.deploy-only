@@ -1,0 +1,18 @@
+-- Requires pg_cron extension (enabled in Supabase hosted projects by default)
+-- Calls the low-stock-notify edge function every day at 08:00 UTC
+-- Replace <YOUR_PROJECT_REF> and <YOUR_ANON_KEY> with actual values when deploying.
+
+select cron.schedule(
+  'low-stock-daily-notify',
+  '0 8 * * *',
+  $$
+    select net.http_post(
+      url := current_setting('app.edge_function_url', true) || '/low-stock-notify',
+      headers := jsonb_build_object(
+        'Content-Type', 'application/json',
+        'Authorization', 'Bearer ' || current_setting('app.service_role_key', true)
+      ),
+      body := '{}'::jsonb
+    );
+  $$
+);

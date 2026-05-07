@@ -1,0 +1,217 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { writeAudit } from "@/lib/audit";
+import { toBase } from "@/lib/units/convert";
+import { ProductFormSchema } from "@inventory/shared/schemas/products";
+
+async function getAdminClient() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role !== "admin") throw new Error("Forbidden");
+  return { supabase, userId: user.id };
+}
+
+async function resolveBaseQuantity(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  value: number | null | undefined,
+  unitCode: string | undefined
+): Promise<number | null> {
+  if (value == null || !unitCode) return null;
+  const { data: unit } = await supabase
+    .from("units")
+    .select("to_base_factor")
+    .eq("code", unitCode)
+    .single();
+  if (!unit) return null;
+  return toBase(value, { code: unitCode, to_base_factor: Number(unit.to_base_factor) });
+}
+
+export async function createProduct(formData: FormData) {
+  const { supabase, userId } = await getAdminClient();
+
+  const raw = {
+    sku: formData.get("sku"),
+    name: formData.get("name"),
+    description: formData.get("description") || undefined,
+    measure_type: formData.get("measure_type"),
+    display_unit: formData.get("display_unit") || undefined,
+    pack_size: formData.get("pack_size") || undefined,
+    reorder_point: formData.get("reorder_point") || undefined,
+    reorder_quantity: formData.get("reorder_quantity") || undefined,
+    reorder_unit: formData.get("reorder_unit") || undefined,
+    user_can_check_in: formData.get("user_can_check_in") === "true",
+    user_can_check_out: formData.get("user_can_check_out") === "true",
+    barcodes: JSON.parse((formData.get("barcodes") as string) || "[]"),
+  };
+
+  const parsed = ProductFormSchema.safeParse(raw);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues.map((i) => i.message).join(", "));
+  }
+
+  const values = parsed.data;
+  const reorderUnit = values.reorder_unit ?? values.display_unit;
+  const baseReorderPoint = await resolveBaseQuantity(supabase, values.reorder_point, reorderUnit);
+  const baseReorderQty = await resolveBaseQuantity(supabase, values.reorder_quantity, reorderUnit);
+
+  const { data: product, error } = await supabase
+    .from("products")
+    .insert({
+      sku: values.sku,
+      name: values.name,
+      description: values.description ?? null,
+      measure_type: values.measure_type,
+      display_unit: values.display_unit ?? null,
+      pack_size: values.pack_size ?? null,
+      reorder_point: baseReorderPoint,
+      reorder_quantity: baseReorderQty,
+      user_can_check_in: values.user_can_check_in,
+      user_can_check_out: values.user_can_check_out,
+      created_by: userId,
+      updated_by: userId,
+    })
+    .select("id")
+    .single();
+
+  if (error) throw new Error(error.message);
+
+  if (values.barcodes.length > 0) {
+    await supabase.from("product_codes").insert(
+      values.barcodes.map((b) => ({
+        product_id: product.id,
+        code: b.code,
+        code_type: b.code_type,
+      }))
+    );
+  }
+
+  await writeAudit(supabase, {
+    actorId: userId,
+    action: "product.create",
+    entityType: "product",
+    entityId: product.id,
+    after: { sku: values.sku, name: values.name },
+  });
+
+  revalidatePath("/catalog");
+  redirect(`/catalog/${product.id}`);
+}
+
+export async function updateProduct(productId: string, formData: FormData) {
+  const { supabase, userId } = await getAdminClient();
+
+  const { data: before } = await supabase
+    .from("products")
+    .select("*")
+    .eq("id", productId)
+    .single();
+
+  const raw = {
+    sku: formData.get("sku"),
+    name: formData.get("name"),
+    description: formData.get("description") || undefined,
+    measure_type: before?.measure_type, // immutable — take from DB
+    display_unit: formData.get("display_unit") || undefined,
+    pack_size: formData.get("pack_size") || undefined,
+    reorder_point: formData.get("reorder_point") || undefined,
+    reorder_quantity: formData.get("reorder_quantity") || undefined,
+    reorder_unit: formData.get("reorder_unit") || undefined,
+    user_can_check_in: formData.get("user_can_check_in") === "true",
+    user_can_check_out: formData.get("user_can_check_out") === "true",
+    barcodes: JSON.parse((formData.get("barcodes") as string) || "[]"),
+  };
+
+  const parsed = ProductFormSchema.safeParse(raw);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues.map((i) => i.message).join(", "));
+  }
+
+  const values = parsed.data;
+  const reorderUnit = values.reorder_unit ?? values.display_unit;
+  const baseReorderPoint = await resolveBaseQuantity(supabase, values.reorder_point, reorderUnit);
+  const baseReorderQty = await resolveBaseQuantity(supabase, values.reorder_quantity, reorderUnit);
+
+  const { error } = await supabase
+    .from("products")
+    .update({
+      sku: values.sku,
+      name: values.name,
+      description: values.description ?? null,
+      display_unit: values.display_unit ?? null,
+      pack_size: values.pack_size ?? null,
+      reorder_point: baseReorderPoint,
+      reorder_quantity: baseReorderQty,
+      user_can_check_in: values.user_can_check_in,
+      user_can_check_out: values.user_can_check_out,
+      updated_by: userId,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", productId);
+
+  if (error) throw new Error(error.message);
+
+  // Replace barcodes
+  await supabase.from("product_codes").delete().eq("product_id", productId);
+  if (values.barcodes.length > 0) {
+    await supabase.from("product_codes").insert(
+      values.barcodes.map((b) => ({
+        product_id: productId,
+        code: b.code,
+        code_type: b.code_type,
+      }))
+    );
+  }
+
+  await writeAudit(supabase, {
+    actorId: userId,
+    action: "product.update",
+    entityType: "product",
+    entityId: productId,
+    before,
+    after: { sku: values.sku, name: values.name },
+  });
+
+  revalidatePath(`/catalog/${productId}`);
+  revalidatePath("/catalog");
+  redirect(`/catalog/${productId}`);
+}
+
+export async function archiveProduct(productId: string) {
+  const { supabase, userId } = await getAdminClient();
+
+  const { data: before } = await supabase
+    .from("products")
+    .select("name, sku, is_archived")
+    .eq("id", productId)
+    .single();
+
+  const { error } = await supabase
+    .from("products")
+    .update({ is_archived: true, updated_by: userId, updated_at: new Date().toISOString() })
+    .eq("id", productId);
+
+  if (error) throw new Error(error.message);
+
+  await writeAudit(supabase, {
+    actorId: userId,
+    action: "product.archive",
+    entityType: "product",
+    entityId: productId,
+    before,
+    after: { is_archived: true },
+  });
+
+  revalidatePath("/catalog");
+  redirect("/catalog");
+}

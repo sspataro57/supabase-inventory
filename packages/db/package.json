@@ -1,0 +1,15 @@
+{
+  "name": "@inventory/db",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "bootstrap-admin": "npx tsx scripts/bootstrap-admin.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.105.3"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.4",
+    "typescript": "^5.9.3"
+  }
+}

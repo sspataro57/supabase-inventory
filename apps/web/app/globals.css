@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+/* Class-based dark mode — toggled via js on <html> */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@media print {
+  .app-chrome { display: none !important; }
+  .print\:hidden { display: none !important; }
+  body { background: white !important; color: black !important; }
+}
