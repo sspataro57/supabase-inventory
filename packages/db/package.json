@@ -3,12 +3,15 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "bootstrap-admin": "npx tsx scripts/bootstrap-admin.ts"
+    "bootstrap-admin": "npx tsx scripts/bootstrap-admin.ts",
+    "create-user": "npx tsx scripts/create-user.ts"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.105.3"
+    "@supabase/supabase-js": "^2.105.3",
+    "ws": "^8.20.0"
   },
   "devDependencies": {
+    "@types/ws": "^8.18.1",
     "tsx": "^4.19.4",
     "typescript": "^5.9.3"
   }
