@@ -39,6 +39,12 @@ importers:
       '@anthropic-ai/sdk':
         specifier: ^0.54.0
         version: 0.54.0
+      '@capacitor-mlkit/barcode-scanning':
+        specifier: ^7.5.0
+        version: 7.5.0(@capacitor/core@7.6.2)
+      '@capacitor/core':
+        specifier: ^7.6.2
+        version: 7.6.2
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.75.0(react@19.2.4))

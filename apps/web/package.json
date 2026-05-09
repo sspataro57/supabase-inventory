@@ -9,6 +9,8 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.54.0",
+    "@capacitor-mlkit/barcode-scanning": "^7.5.0",
+    "@capacitor/core": "^7.6.2",
     "@hookform/resolvers": "^5.2.2",
     "@inventory/shared": "workspace:*",
     "@react-pdf/renderer": "^4.5.1",
