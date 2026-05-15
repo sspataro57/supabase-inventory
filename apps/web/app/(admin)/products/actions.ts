@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { writeAudit } from "@/lib/audit";
 import { toBase } from "@/lib/units/convert";
-import { ProductFormSchema } from "@inventory/shared/schemas/products";
+import { NewIngredientFormSchema, ProductFormSchema } from "@inventory/shared/schemas/products";
 
 async function getAdminClient() {
   const supabase = await createClient();
@@ -185,6 +185,107 @@ export async function updateProduct(productId: string, formData: FormData) {
   revalidatePath(`/catalog/${productId}`);
   revalidatePath("/catalog");
   redirect(`/catalog/${productId}`);
+}
+
+export async function createIngredient(formData: FormData) {
+  const { supabase, userId } = await getAdminClient();
+
+  const raw = {
+    sku: formData.get("sku"),
+    name: formData.get("name"),
+    inventory_type: formData.get("inventory_type") || undefined,
+    manufacturer: formData.get("manufacturer") || undefined,
+    manufacturer_item_no: formData.get("manufacturer_item_no") || undefined,
+    broker: formData.get("broker") || undefined,
+    broker_item_no: formData.get("broker_item_no") || undefined,
+    allergen: formData.get("allergen") || undefined,
+    category: formData.get("category") || undefined,
+    lot_code: formData.get("lot_code"),
+    location: formData.get("location") || undefined,
+    date_received: formData.get("date_received"),
+    manufacture_date: formData.get("manufacture_date") || undefined,
+    expiration_date: formData.get("expiration_date") || undefined,
+    amount_received_oz: formData.get("amount_received_oz") || undefined,
+  };
+
+  const parsed = NewIngredientFormSchema.safeParse(raw);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues.map((i) => i.message).join(", "));
+  }
+  const v = parsed.data;
+
+  // Oz is mass. Look up its to_base_factor so the movement records base grams.
+  const { data: ozUnit } = await supabase
+    .from("units")
+    .select("to_base_factor")
+    .eq("code", "oz")
+    .single();
+  if (!ozUnit) throw new Error("oz unit not found in units table");
+  const baseQuantity = toBase(v.amount_received_oz, {
+    code: "oz",
+    to_base_factor: Number(ozUnit.to_base_factor),
+  });
+
+  // 1. Product master
+  const { data: product, error: productErr } = await supabase
+    .from("products")
+    .insert({
+      sku: v.sku,
+      name: v.name,
+      measure_type: "mass",
+      display_unit: "oz",
+      inventory_type: v.inventory_type ?? null,
+      manufacturer: v.manufacturer ?? null,
+      manufacturer_item_no: v.manufacturer_item_no ?? null,
+      broker: v.broker ?? null,
+      broker_item_no: v.broker_item_no ?? null,
+      allergen: v.allergen ?? null,
+      category: v.category ?? null,
+      created_by: userId,
+      updated_by: userId,
+    })
+    .select("id")
+    .single();
+  if (productErr) throw new Error(productErr.message);
+
+  // 2. First lot
+  const { data: lot, error: lotErr } = await supabase
+    .from("lots")
+    .insert({
+      product_id: product.id,
+      lot_code: v.lot_code,
+      received_on: v.date_received,
+      manufacture_date: v.manufacture_date ?? null,
+      expires_on: v.expiration_date ?? null,
+      location: v.location ?? null,
+      created_by: userId,
+    })
+    .select("id")
+    .single();
+  if (lotErr) throw new Error(lotErr.message);
+
+  // 3. Check-in movement for the amount received
+  const { error: movementErr } = await supabase.from("movements").insert({
+    product_id: product.id,
+    lot_id: lot.id,
+    movement_type: "check_in",
+    base_quantity: baseQuantity,
+    input_quantity: v.amount_received_oz,
+    input_unit: "oz",
+    performed_by: userId,
+  });
+  if (movementErr) throw new Error(movementErr.message);
+
+  await writeAudit(supabase, {
+    actorId: userId,
+    action: "product.create",
+    entityType: "product",
+    entityId: product.id,
+    after: { sku: v.sku, name: v.name, lot_code: v.lot_code },
+  });
+
+  revalidatePath("/catalog");
+  redirect(`/catalog/${product.id}`);
 }
 
 export async function archiveProduct(productId: string) {

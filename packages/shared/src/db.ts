@@ -80,7 +80,9 @@ export type Database = {
           expires_on: string | null
           id: string
           is_archived: boolean
+          location: string | null
           lot_code: string
+          manufacture_date: string | null
           notes: string | null
           product_id: string
           received_on: string
@@ -91,7 +93,9 @@ export type Database = {
           expires_on?: string | null
           id?: string
           is_archived?: boolean
+          location?: string | null
           lot_code: string
+          manufacture_date?: string | null
           notes?: string | null
           product_id: string
           received_on?: string
@@ -102,7 +106,9 @@ export type Database = {
           expires_on?: string | null
           id?: string
           is_archived?: boolean
+          location?: string | null
           lot_code?: string
+          manufacture_date?: string | null
           notes?: string | null
           product_id?: string
           received_on?: string
@@ -338,12 +344,19 @@ export type Database = {
       }
       products: {
         Row: {
+          allergen: string | null
+          broker: string | null
+          broker_item_no: string | null
+          category: string | null
           created_at: string
           created_by: string | null
           description: string | null
           display_unit: string | null
           id: string
+          inventory_type: string | null
           is_archived: boolean
+          manufacturer: string | null
+          manufacturer_item_no: string | null
           measure_type: Database["public"]["Enums"]["measure_type"]
           name: string
           pack_size: number | null
@@ -356,12 +369,19 @@ export type Database = {
           user_can_check_out: boolean
         }
         Insert: {
+          allergen?: string | null
+          broker?: string | null
+          broker_item_no?: string | null
+          category?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           display_unit?: string | null
           id?: string
+          inventory_type?: string | null
           is_archived?: boolean
+          manufacturer?: string | null
+          manufacturer_item_no?: string | null
           measure_type: Database["public"]["Enums"]["measure_type"]
           name: string
           pack_size?: number | null
@@ -374,12 +394,19 @@ export type Database = {
           user_can_check_out?: boolean
         }
         Update: {
+          allergen?: string | null
+          broker?: string | null
+          broker_item_no?: string | null
+          category?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           display_unit?: string | null
           id?: string
+          inventory_type?: string | null
           is_archived?: boolean
+          manufacturer?: string | null
+          manufacturer_item_no?: string | null
           measure_type?: Database["public"]["Enums"]["measure_type"]
           name?: string
           pack_size?: number | null

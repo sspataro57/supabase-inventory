@@ -23,11 +23,8 @@ export function NavBar({ profile }: { profile: Profile }) {
     { href: "/reports", label: "Reports" },
     ...(isAdmin
       ? [
-          { href: "/products/new", label: "+ Product" },
+          { href: "/products/new", label: "+ New Ingredient" },
           { href: "/users", label: "Users" },
-          { href: "/preferences", label: "Preferences" },
-          { href: "/audit", label: "Audit" },
-          { href: "/import", label: "Import/Export" },
         ]
       : []),
   ];

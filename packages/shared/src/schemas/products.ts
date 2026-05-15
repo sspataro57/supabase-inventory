@@ -21,3 +21,42 @@ export const ProductFormSchema = z.object({
 });
 
 export type ProductFormValues = z.infer<typeof ProductFormSchema>;
+
+const optionalText = z
+  .string()
+  .trim()
+  .optional()
+  .transform((v) => (v === "" ? undefined : v));
+
+const optionalDate = z
+  .string()
+  .optional()
+  .transform((v) => (v === "" ? undefined : v))
+  .refine((v) => v === undefined || /^\d{4}-\d{2}-\d{2}$/.test(v), {
+    message: "Date must be YYYY-MM-DD",
+  });
+
+export const NewIngredientFormSchema = z.object({
+  // Product master
+  sku: z.string().trim().min(1, "RM# is required"),
+  name: z.string().trim().min(1, "Name is required"),
+  inventory_type: optionalText,
+  manufacturer: optionalText,
+  manufacturer_item_no: optionalText,
+  broker: optionalText,
+  broker_item_no: optionalText,
+  allergen: optionalText,
+  category: optionalText,
+  // Lot
+  lot_code: z.string().trim().min(1, "Lot Code is required"),
+  location: optionalText,
+  date_received: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date received must be YYYY-MM-DD"),
+  manufacture_date: optionalDate,
+  expiration_date: optionalDate,
+  // Movement (always recorded in oz)
+  amount_received_oz: z.coerce.number().positive("Amount received must be > 0"),
+});
+
+export type NewIngredientFormValues = z.infer<typeof NewIngredientFormSchema>;
