@@ -26,14 +26,14 @@ export type ReportDef = {
 export const REPORTS: ReportDef[] = [
   {
     slug: "inventory-per-product",
-    name: "Inventory by Product",
-    description: "Current on-hand for every active product in display units, with reorder status.",
+    name: "Inventory by Ingredient",
+    description: "Current on-hand for every active ingredient in display units, with reorder status.",
     isAdminOnly: false,
     params: [],
     rpcName: "report_inventory_per_product",
     columns: [
       { key: "sku", label: "SKU" },
-      { key: "name", label: "Product" },
+      { key: "name", label: "Ingredient" },
       { key: "on_hand_display", label: "On Hand", numeric: true },
       { key: "display_unit", label: "Unit" },
       { key: "reorder_point_display", label: "Reorder At", numeric: true },
@@ -51,7 +51,7 @@ export const REPORTS: ReportDef[] = [
     rpcName: "report_inventory_detailed",
     columns: [
       { key: "sku", label: "SKU" },
-      { key: "product_name", label: "Product" },
+      { key: "product_name", label: "Ingredient" },
       { key: "lot_code", label: "Lot" },
       { key: "expires_on", label: "Expires", date: true },
       { key: "is_expired", label: "Expired" },
@@ -70,7 +70,7 @@ export const REPORTS: ReportDef[] = [
     rpcName: "report_physical_count_sheet",
     columns: [
       { key: "sku", label: "SKU" },
-      { key: "name", label: "Product" },
+      { key: "name", label: "Ingredient" },
       { key: "system_on_hand", label: "System Count", numeric: true },
       { key: "display_unit", label: "Unit" },
       { key: "_counted", label: "Counted" },
@@ -81,10 +81,10 @@ export const REPORTS: ReportDef[] = [
   {
     slug: "movements-per-product",
     name: "Movement Ledger",
-    description: "Full movement history for one product over a date range.",
+    description: "Full movement history for one ingredient over a date range.",
     isAdminOnly: false,
     params: [
-      { type: "uuid", name: "p_product_id", label: "Product", default: null },
+      { type: "uuid", name: "p_product_id", label: "Ingredient", default: null },
       { type: "date", name: "p_from", label: "From", default: thirtyDaysAgo() },
       { type: "date", name: "p_to", label: "To", default: today() },
     ],
@@ -102,7 +102,7 @@ export const REPORTS: ReportDef[] = [
   {
     slug: "movements-summary",
     name: "Movements Summary",
-    description: "Daily check-in/out totals across all products for a date range.",
+    description: "Daily check-in/out totals across all ingredients for a date range.",
     isAdminOnly: false,
     params: [
       { type: "date", name: "p_from", label: "From", default: thirtyDaysAgo() },
@@ -112,7 +112,7 @@ export const REPORTS: ReportDef[] = [
     columns: [
       { key: "day", label: "Day", date: true },
       { key: "sku", label: "SKU" },
-      { key: "product_name", label: "Product" },
+      { key: "product_name", label: "Ingredient" },
       { key: "n_check_ins", label: "Check-ins", numeric: true },
       { key: "n_check_outs", label: "Check-outs", numeric: true },
       { key: "in_display", label: "In", numeric: true },
@@ -124,13 +124,13 @@ export const REPORTS: ReportDef[] = [
   {
     slug: "low-stock",
     name: "Low Stock",
-    description: "Products at or below their reorder point with suggested order quantities.",
+    description: "Ingredients at or below their reorder point with suggested order quantities.",
     isAdminOnly: false,
     params: [],
     rpcName: "report_low_stock",
     columns: [
       { key: "sku", label: "SKU" },
-      { key: "name", label: "Product" },
+      { key: "name", label: "Ingredient" },
       { key: "on_hand_display", label: "On Hand", numeric: true },
       { key: "reorder_point_display", label: "Reorder At", numeric: true },
       { key: "shortage_display", label: "Shortage", numeric: true },
@@ -153,7 +153,7 @@ export const REPORTS: ReportDef[] = [
       { key: "is_expired", label: "Expired" },
       { key: "lot_code", label: "Lot" },
       { key: "sku", label: "SKU" },
-      { key: "product_name", label: "Product" },
+      { key: "product_name", label: "Ingredient" },
       { key: "on_hand_display", label: "On Hand", numeric: true },
       { key: "display_unit", label: "Unit" },
     ],
@@ -161,7 +161,7 @@ export const REPORTS: ReportDef[] = [
   {
     slug: "dead-stock",
     name: "Dead Stock",
-    description: "Products with no movement in N days. Candidates for write-down or disposal.",
+    description: "Ingredients with no movement in N days. Candidates for write-down or disposal.",
     isAdminOnly: true,
     params: [
       { type: "number", name: "p_days_inactive", label: "Days inactive", default: 90, min: 1, max: 3650 },
@@ -169,7 +169,7 @@ export const REPORTS: ReportDef[] = [
     rpcName: "report_dead_stock",
     columns: [
       { key: "sku", label: "SKU" },
-      { key: "name", label: "Product" },
+      { key: "name", label: "Ingredient" },
       { key: "on_hand_display", label: "On Hand", numeric: true },
       { key: "display_unit", label: "Unit" },
       { key: "last_movement_at", label: "Last Movement", date: true },

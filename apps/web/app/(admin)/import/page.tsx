@@ -79,7 +79,7 @@ export default async function ImportPage({
 
       {/* Import form */}
       <section>
-        <h2 className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-3">Import products</h2>
+        <h2 className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-3">Import ingredients</h2>
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 px-6 py-5">
           <div className="flex items-start justify-between gap-4 mb-4">
             <p className="text-xs text-gray-500 dark:text-gray-400">

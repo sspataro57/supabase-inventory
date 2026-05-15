@@ -138,18 +138,18 @@ export default async function CatalogPage({
 
       {error && (
         <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 px-4 py-3 text-sm text-red-700 dark:text-red-400 mb-4">
-          Failed to load products.
+          Failed to load ingredients.
         </div>
       )}
 
       {/* Active products */}
       {(!stockItems || stockItems.length === 0) && archivedItems.length === 0 && !error && (
         <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-10 text-center text-sm text-gray-400 dark:text-gray-500">
-          {q ? `No products matching "${q}".` : "No products yet."}
+          {q ? `No ingredients matching "${q}".` : "No ingredients yet."}
           {isAdmin && !q && (
             <p className="mt-2">
               <Link href="/products/new" className="text-indigo-600 hover:underline">
-                Create the first product
+                Create the first ingredient
               </Link>
             </p>
           )}

@@ -24,7 +24,7 @@ export default async function NewMovementPage({
     return (
       <div>
         <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-50 mb-6">Record movement</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Select a product to continue.</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Select an ingredient to continue.</p>
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-700 max-w-sm overflow-hidden">
           {products?.map((p) => (
             <Link
@@ -40,7 +40,7 @@ export default async function NewMovementPage({
             </Link>
           ))}
           {!products?.length && (
-            <p className="px-4 py-3 text-sm text-gray-400 dark:text-gray-500">No products found.</p>
+            <p className="px-4 py-3 text-sm text-gray-400 dark:text-gray-500">No ingredients found.</p>
           )}
         </div>
       </div>

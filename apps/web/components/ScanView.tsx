@@ -186,7 +186,7 @@ export function ScanView() {
 
           {result.product.is_archived && (
             <div className="rounded-lg bg-amber-50 dark:bg-yellow-900/20 border border-amber-200 px-3 py-2 text-xs text-amber-700 dark:text-yellow-300">
-              This product is archived — movements may still be recorded.
+              This ingredient is archived — movements may still be recorded.
             </div>
           )}
 

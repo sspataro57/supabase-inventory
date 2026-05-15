@@ -28,7 +28,7 @@ export function ProductPickerClient({ name, defaultValue }: { name: string; defa
       required
       className="rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm text-gray-900 dark:text-gray-50 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
     >
-      <option value="">Select product…</option>
+      <option value="">Select ingredient…</option>
       {products.map((p) => (
         <option key={p.id} value={p.id}>
           {p.name} ({p.sku})

@@ -13,7 +13,7 @@ const W = {
 export const PDF_COLUMNS: Record<string, ColDef[]> = {
   "inventory-per-product": [
     { key: "sku",                  label: "SKU",         width: W.sm },
-    { key: "name",                 label: "Product",     width: W.xxl },
+    { key: "name",                 label: "Ingredient",     width: W.xxl },
     { key: "on_hand_display",      label: "On Hand",     width: W.sm, numeric: true },
     { key: "display_unit",         label: "Unit",        width: W.xs },
     { key: "reorder_point_display",label: "Reorder At",  width: W.sm, numeric: true },
@@ -23,7 +23,7 @@ export const PDF_COLUMNS: Record<string, ColDef[]> = {
   ],
   "inventory-detailed": [
     { key: "sku",          label: "SKU",      width: W.sm },
-    { key: "product_name", label: "Product",  width: W.xl },
+    { key: "product_name", label: "Ingredient",  width: W.xl },
     { key: "lot_code",     label: "Lot",      width: W.md },
     { key: "expires_on",   label: "Expires",  width: W.sm, date: true },
     { key: "is_expired",   label: "Expired",  width: W.xs },
@@ -32,7 +32,7 @@ export const PDF_COLUMNS: Record<string, ColDef[]> = {
   ],
   "physical-count-sheet": [
     { key: "sku",           label: "SKU",          width: W.sm },
-    { key: "name",          label: "Product",      width: W.xl },
+    { key: "name",          label: "Ingredient",      width: W.xl },
     { key: "display_unit",  label: "Unit",         width: W.xs },
     { key: "system_on_hand",label: "System Count", width: W.sm, numeric: true },
     { key: "_counted",      label: "Counted",      width: W.md },
@@ -51,7 +51,7 @@ export const PDF_COLUMNS: Record<string, ColDef[]> = {
   "movements-summary": [
     { key: "day",         label: "Day",       width: W.sm, date: true },
     { key: "sku",         label: "SKU",       width: W.sm },
-    { key: "product_name",label: "Product",   width: W.xl },
+    { key: "product_name",label: "Ingredient",   width: W.xl },
     { key: "n_check_ins", label: "In #",      width: W.xs, numeric: true },
     { key: "n_check_outs",label: "Out #",     width: W.xs, numeric: true },
     { key: "in_display",  label: "In",        width: W.sm, numeric: true },
@@ -61,7 +61,7 @@ export const PDF_COLUMNS: Record<string, ColDef[]> = {
   ],
   "low-stock": [
     { key: "sku",                    label: "SKU",          width: W.sm },
-    { key: "name",                   label: "Product",      width: W.xl },
+    { key: "name",                   label: "Ingredient",      width: W.xl },
     { key: "on_hand_display",        label: "On Hand",      width: W.sm, numeric: true },
     { key: "reorder_point_display",  label: "Reorder At",   width: W.sm, numeric: true },
     { key: "shortage_display",       label: "Shortage",     width: W.sm, numeric: true },
@@ -73,14 +73,14 @@ export const PDF_COLUMNS: Record<string, ColDef[]> = {
     { key: "days_until_expiry", label: "Days",      width: W.xs, numeric: true },
     { key: "lot_code",          label: "Lot",       width: W.md },
     { key: "sku",               label: "SKU",       width: W.sm },
-    { key: "product_name",      label: "Product",   width: W.xl },
+    { key: "product_name",      label: "Ingredient",   width: W.xl },
     { key: "on_hand_display",   label: "On Hand",   width: W.sm, numeric: true },
     { key: "display_unit",      label: "Unit",      width: W.xs },
     { key: "is_expired",        label: "Expired",   width: W.xs },
   ],
   "dead-stock": [
     { key: "sku",              label: "SKU",          width: W.sm },
-    { key: "name",             label: "Product",      width: W.xl },
+    { key: "name",             label: "Ingredient",      width: W.xl },
     { key: "on_hand_display",  label: "On Hand",      width: W.sm, numeric: true },
     { key: "display_unit",     label: "Unit",         width: W.xs },
     { key: "last_movement_at", label: "Last Movement",width: W.md, date: true },

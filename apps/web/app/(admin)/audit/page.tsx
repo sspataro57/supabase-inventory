@@ -82,7 +82,7 @@ export default async function AuditPage({
           className="rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-900 dark:text-gray-50 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
           <option value="">All types</option>
-          <option value="product">Product</option>
+          <option value="product">Ingredient</option>
           <option value="lot">Lot</option>
           <option value="preferences">Preferences</option>
           <option value="profile">Profile</option>
