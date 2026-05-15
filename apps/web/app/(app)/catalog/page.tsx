@@ -87,7 +87,7 @@ export default async function CatalogPage({
             href="/products/new"
             className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors"
           >
-            + New product
+            + New Ingredient
           </Link>
         )}
       </div>
