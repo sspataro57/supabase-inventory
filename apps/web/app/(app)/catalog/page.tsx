@@ -10,7 +10,6 @@ const MEASURE_BADGE: Record<string, string> = {
 
 type SearchParams = {
   q?: string;
-  type?: string;
   low_stock?: string;
   archived?: string;
 };
@@ -22,7 +21,6 @@ export default async function CatalogPage({
 }) {
   const sp = await searchParams;
   const q = sp.q ?? "";
-  const typeFilter = sp.type ?? "";
   const showLowStock = sp.low_stock === "1";
   const showArchived = sp.archived === "1";
 
@@ -47,7 +45,6 @@ export default async function CatalogPage({
   if (!showArchived) {
     // product_stock view already excludes archived
   }
-  if (typeFilter) stockQuery = stockQuery.eq("measure_type", typeFilter);
   if (showLowStock) stockQuery = stockQuery.eq("is_low_stock", true);
   if (q) stockQuery = stockQuery.or(`name.ilike.%${q}%,sku.ilike.%${q}%`);
 
@@ -61,7 +58,6 @@ export default async function CatalogPage({
       .select("id, sku, name, measure_type, display_unit")
       .eq("is_archived", true)
       .order("name");
-    if (typeFilter) archivedQ = archivedQ.eq("measure_type", typeFilter);
     if (q) archivedQ = archivedQ.or(`name.ilike.%${q}%,sku.ilike.%${q}%`);
     const { data } = await archivedQ;
     archivedItems = data ?? [];
@@ -70,13 +66,12 @@ export default async function CatalogPage({
   function buildUrl(overrides: Partial<SearchParams>) {
     const params = new URLSearchParams();
     if ((overrides.q ?? q)) params.set("q", overrides.q ?? q);
-    if ((overrides.type ?? typeFilter)) params.set("type", overrides.type ?? typeFilter);
     if (overrides.low_stock ?? (showLowStock ? "1" : "")) params.set("low_stock", overrides.low_stock ?? "1");
     if (overrides.archived ?? (showArchived ? "1" : "")) params.set("archived", overrides.archived ?? "1");
     return `/catalog?${params.toString()}`;
   }
 
-  const hasFilters = q || typeFilter || showLowStock || showArchived;
+  const hasFilters = q || showLowStock || showArchived;
 
   return (
     <div>
@@ -97,19 +92,9 @@ export default async function CatalogPage({
         <input
           name="q"
           defaultValue={q}
-          placeholder="Search by name or SKU…"
+          placeholder="Search by name or RM#…"
           className="rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-900 dark:text-gray-50 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
-        <select
-          name="type"
-          defaultValue={typeFilter}
-          className="rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-900 dark:text-gray-50 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        >
-          <option value="">All types</option>
-          <option value="mass">Mass</option>
-          <option value="volume">Volume</option>
-          <option value="count">Count</option>
-        </select>
         <label className="flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 cursor-pointer">
           <input type="checkbox" name="low_stock" value="1" defaultChecked={showLowStock} className="rounded" />
           Low stock only

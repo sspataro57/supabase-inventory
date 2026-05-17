@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { setUserRole, setUserActive } from "./actions";
+import { NewUserForm } from "@/components/NewUserForm";
+import { setUserRole, setUserActive, createUser } from "./actions";
 
 export default async function UsersPage() {
   const supabase = await createClient();
@@ -11,7 +12,10 @@ export default async function UsersPage() {
 
   return (
     <div>
-      <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-50 mb-6">Users</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-50">Users</h1>
+        <NewUserForm action={createUser} />
+      </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-700 overflow-hidden">
         {users?.map((u) => (
