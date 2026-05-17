@@ -111,7 +111,7 @@ export default async function DashboardPage() {
     .reverse(); // BarChart horizontal — ascending for readability
 
   const kpis = [
-    { label: "Active SKUs", value: totalSkus ?? 0 },
+    { label: "Active RMs", value: totalSkus ?? 0 },
     { label: "Low Stock", value: lowStockCount ?? 0, alert: (lowStockCount ?? 0) > 0 },
     { label: "Expiring (30d)", value: expiringMonthCount ?? 0, alert: (expiringMonthCount ?? 0) > 0 },
     { label: "Movements Today", value: movementsToday },

@@ -8,23 +8,42 @@ import { resolveDisplayUnit, formatStock } from "@/lib/stock";
 export default async function NewMovementPage({
   searchParams,
 }: {
-  searchParams: Promise<{ product?: string; type?: string; lot?: string }>;
+  searchParams: Promise<{ product?: string; type?: string; lot?: string; q?: string }>;
 }) {
-  const { product: productId, type, lot: defaultLotId } = await searchParams;
+  const { product: productId, type, lot: defaultLotId, q } = await searchParams;
   const supabase = await createClient();
 
   // If no product selected, show a product picker
   if (!productId) {
-    const { data: products } = await supabase
+    let pickerQuery = supabase
       .from("products")
       .select("id, name, sku, measure_type")
       .eq("is_archived", false)
-      .order("name");
+      .order("sku");
+
+    // Filter only by RM# (the sku field)
+    if (q) pickerQuery = pickerQuery.ilike("sku", `%${q}%`);
+
+    const { data: products } = await pickerQuery;
 
     return (
       <div>
         <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-50 mb-6">Record movement</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Select an ingredient to continue.</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Select a RM# to continue.</p>
+        <form method="GET" className="flex gap-2 mb-4 max-w-sm">
+          <input
+            name="q"
+            defaultValue={q ?? ""}
+            placeholder="Search by RM#…"
+            className="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-900 dark:text-gray-50 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+          <button
+            type="submit"
+            className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 transition-colors"
+          >
+            Filter
+          </button>
+        </form>
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-700 max-w-sm overflow-hidden">
           {products?.map((p) => (
             <Link
@@ -33,14 +52,16 @@ export default async function NewMovementPage({
               className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-50">{p.name}</p>
-                <p className="text-xs text-gray-400 dark:text-gray-500">{p.sku}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-50">{p.sku}</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500">{p.name}</p>
               </div>
               <span className="text-gray-300 dark:text-gray-600">›</span>
             </Link>
           ))}
           {!products?.length && (
-            <p className="px-4 py-3 text-sm text-gray-400 dark:text-gray-500">No ingredients found.</p>
+            <p className="px-4 py-3 text-sm text-gray-400 dark:text-gray-500">
+              {q ? `No RM# matching "${q}".` : "No ingredients found."}
+            </p>
           )}
         </div>
       </div>
