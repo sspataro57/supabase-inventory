@@ -12,6 +12,7 @@ type SearchParams = {
   q?: string;
   low_stock?: string;
   archived?: string;
+  room?: string;
 };
 
 export default async function CatalogPage({
@@ -23,55 +24,87 @@ export default async function CatalogPage({
   const q = sp.q ?? "";
   const showLowStock = sp.low_stock === "1";
   const showArchived = sp.archived === "1";
+  const roomCode = sp.room ?? "";
 
   const supabase = await createClient();
 
   const userId = (await supabase.auth.getUser()).data.user!.id;
 
-  const [{ data: profile }, { data: prefs }, { data: units }] = await Promise.all([
+  const [{ data: profile }, { data: prefs }, { data: units }, { data: rooms }] = await Promise.all([
     supabase.from("profiles").select("role").eq("id", userId).single(),
     supabase.from("preferences").select("default_unit_mass, default_unit_volume, default_unit_count").eq("id", 1).single(),
     supabase.from("units").select("code, to_base_factor, measure_type").eq("is_active", true),
+    supabase.from("locations").select("id, code, name").eq("is_active", true).order("sort_order"),
   ]);
 
   const isAdmin = profile?.role === "admin";
 
-  // Load stock for the products we'll show (via product_stock view)
-  let stockQuery = supabase
-    .from("product_stock")
-    .select("product_id, sku, name, measure_type, display_unit, base_on_hand, reorder_point, is_low_stock")
-    .order("name");
-
-  if (!showArchived) {
-    // product_stock view already excludes archived
+  // If a room filter is active, resolve it to a set of product_ids.
+  let roomFilteredProductIds: string[] | null = null;
+  if (roomCode) {
+    const room = (rooms ?? []).find((r) => r.code === roomCode);
+    if (!room) {
+      roomFilteredProductIds = [];
+    } else {
+      const { data: subs } = await supabase
+        .from("sub_locations")
+        .select("id")
+        .eq("location_id", room.id);
+      const subIds = (subs ?? []).map((s) => s.id);
+      if (subIds.length === 0) {
+        roomFilteredProductIds = [];
+      } else {
+        const { data: prods } = await supabase
+          .from("products")
+          .select("id")
+          .in("sub_location_id", subIds);
+        roomFilteredProductIds = (prods ?? []).map((p) => p.id);
+      }
+    }
   }
-  if (showLowStock) stockQuery = stockQuery.eq("is_low_stock", true);
-  if (q) stockQuery = stockQuery.or(`name.ilike.%${q}%,sku.ilike.%${q}%`);
 
-  const { data: stockItems, error } = await stockQuery;
+  // Empty-room short-circuit: when a room filter is active and there are no
+  // matching products, skip the queries entirely (a `.in(col, [])` request can
+  // error or behave inconsistently in PostgREST).
+  const emptyRoom = roomFilteredProductIds !== null && roomFilteredProductIds.length === 0;
+
+  // Load stock for the products we'll show (via product_stock view)
+  let stockItems:
+    | { product_id: string; sku: string; name: string; measure_type: string; display_unit: string | null; base_on_hand: number; reorder_point: number | null; is_low_stock: boolean }[]
+    | null = null;
+  let hasError = false;
+  if (!emptyRoom) {
+    let stockQuery = supabase
+      .from("product_stock")
+      .select("product_id, sku, name, measure_type, display_unit, base_on_hand, reorder_point, is_low_stock")
+      .order("name");
+
+    if (showLowStock) stockQuery = stockQuery.eq("is_low_stock", true);
+    if (q) stockQuery = stockQuery.or(`name.ilike.%${q}%,sku.ilike.%${q}%`);
+    if (roomFilteredProductIds !== null) stockQuery = stockQuery.in("product_id", roomFilteredProductIds);
+
+    const res = await stockQuery;
+    stockItems = res.data;
+    hasError = res.error != null;
+  } else {
+    stockItems = [];
+  }
 
   // If showArchived, we need to query products table directly as well
   let archivedItems: { id: string; sku: string; name: string; measure_type: string; display_unit: string | null }[] = [];
-  if (showArchived) {
+  if (showArchived && !emptyRoom) {
     let archivedQ = supabase
       .from("products")
       .select("id, sku, name, measure_type, display_unit")
       .eq("is_archived", true)
       .order("name");
     if (q) archivedQ = archivedQ.or(`name.ilike.%${q}%,sku.ilike.%${q}%`);
+    if (roomFilteredProductIds !== null) archivedQ = archivedQ.in("id", roomFilteredProductIds);
     const { data } = await archivedQ;
     archivedItems = data ?? [];
   }
 
-  function buildUrl(overrides: Partial<SearchParams>) {
-    const params = new URLSearchParams();
-    if ((overrides.q ?? q)) params.set("q", overrides.q ?? q);
-    if (overrides.low_stock ?? (showLowStock ? "1" : "")) params.set("low_stock", overrides.low_stock ?? "1");
-    if (overrides.archived ?? (showArchived ? "1" : "")) params.set("archived", overrides.archived ?? "1");
-    return `/catalog?${params.toString()}`;
-  }
-
-  const hasFilters = q || showLowStock || showArchived;
+  const hasFilters = q || showLowStock || showArchived || roomCode;
 
   return (
     <div>
@@ -95,6 +128,18 @@ export default async function CatalogPage({
           placeholder="Search by name or RM#…"
           className="rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-900 dark:text-gray-50 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
+        <select
+          name="room"
+          defaultValue={roomCode}
+          className="rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-900 dark:text-gray-50 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        >
+          <option value="">All rooms</option>
+          {(rooms ?? []).map((r) => (
+            <option key={r.id} value={r.code}>
+              {r.name}
+            </option>
+          ))}
+        </select>
         <label className="flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 cursor-pointer">
           <input type="checkbox" name="low_stock" value="1" defaultChecked={showLowStock} className="rounded" />
           Low stock only
@@ -121,14 +166,14 @@ export default async function CatalogPage({
         )}
       </form>
 
-      {error && (
+      {hasError && (
         <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 px-4 py-3 text-sm text-red-700 dark:text-red-400 mb-4">
           Failed to load ingredients.
         </div>
       )}
 
       {/* Active products */}
-      {(!stockItems || stockItems.length === 0) && archivedItems.length === 0 && !error && (
+      {(!stockItems || stockItems.length === 0) && archivedItems.length === 0 && !hasError && (
         <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-10 text-center text-sm text-gray-400 dark:text-gray-500">
           {q ? `No ingredients matching "${q}".` : "No ingredients yet."}
           {isAdmin && !q && (
