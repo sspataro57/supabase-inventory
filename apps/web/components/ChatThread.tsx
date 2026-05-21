@@ -140,7 +140,14 @@ export function ChatThread({
       <div className="flex-1 overflow-y-auto space-y-4 pb-4">
         {messages.length === 0 && (
           <div className="pt-8 text-center">
-            <p className="text-sm text-gray-400 dark:text-gray-500 mb-6">Ask anything about your inventory.</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">Ask anything about your inventory.</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mb-6 max-w-md mx-auto">
+              No commands or keywords needed — just ask in plain language, the way you
+              would ask a colleague. The assistant can tell you current stock levels,
+              which items are low or running out, lots that are expiring soon, lot
+              details, recent movements, your default units, and unit conversions. It
+              can read your inventory but cannot make changes.
+            </p>
             <div className="flex flex-wrap gap-2 justify-center">
               {SUGGESTED_PROMPTS.map((p) => (
                 <button
