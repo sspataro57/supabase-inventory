@@ -38,6 +38,14 @@ export default async function ProductDetailPage({
 
   if (!product) notFound();
 
+  const { data: subLocation } = product.sub_location_id
+    ? await supabase
+        .from("sub_locations")
+        .select("code, locations(name)")
+        .eq("id", product.sub_location_id)
+        .maybeSingle()
+    : { data: null };
+
   const isAdmin = profile?.role === "admin";
   const archiveAction = archiveProduct.bind(null, id);
 
@@ -69,6 +77,16 @@ export default async function ProductDetailPage({
           </div>
           <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-50">{product.name}</h1>
           <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">{product.sku}</p>
+          {subLocation && (() => {
+            const rel = subLocation.locations as { name: string } | { name: string }[] | null;
+            const roomName = Array.isArray(rel) ? rel[0]?.name : rel?.name;
+            return (
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <span className="font-mono">{subLocation.code}</span>
+                {roomName && <> · {roomName}</>}
+              </p>
+            );
+          })()}
         </div>
 
         {isAdmin && (

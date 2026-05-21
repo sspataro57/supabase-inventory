@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ShelfSchema, LevelSchema, SpotSchema } from "./locations";
 
 export const BarcodeSchema = z.object({
   code: z.string().min(1, "Barcode value required"),
@@ -47,9 +48,13 @@ export const NewIngredientFormSchema = z.object({
   broker_item_no: optionalText,
   allergen: optionalText,
   category: optionalText,
+  // Sub-location (per product, not per lot)
+  room_id: z.string().uuid("Room is required"),
+  shelf: ShelfSchema,
+  level: LevelSchema,
+  spot: SpotSchema,
   // Lot
   lot_code: z.string().trim().min(1, "Lot Code is required"),
-  location: optionalText,
   date_received: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, "Date received must be YYYY-MM-DD"),

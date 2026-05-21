@@ -4,15 +4,17 @@
   "private": true,
   "scripts": {
     "bootstrap-admin": "npx tsx scripts/bootstrap-admin.ts",
-    "create-user": "npx tsx scripts/create-user.ts"
+    "create-user": "npx tsx scripts/create-user.ts",
+    "test": "vitest run"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.105.3",
     "ws": "^8.20.0"
   },
   "devDependencies": {
+    "@supabase/supabase-js": "^2.105.3",
     "@types/ws": "^8.18.1",
     "tsx": "^4.19.4",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.7"
   }
 }

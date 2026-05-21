@@ -12,7 +12,8 @@
     "db:push": "supabase db push"
   },
   "devDependencies": {
-    "turbo": "^2.5.4"
+    "turbo": "^2.5.4",
+    "vitest": "^4.1.7"
   },
   "packageManager": "pnpm@10.28.0",
   "engines": {

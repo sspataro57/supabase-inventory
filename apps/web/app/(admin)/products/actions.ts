@@ -200,8 +200,11 @@ export async function createIngredient(formData: FormData) {
     broker_item_no: formData.get("broker_item_no") || undefined,
     allergen: formData.get("allergen") || undefined,
     category: formData.get("category") || undefined,
+    room_id: formData.get("room_id"),
+    shelf: formData.get("shelf"),
+    level: formData.get("level"),
+    spot: formData.get("spot"),
     lot_code: formData.get("lot_code"),
-    location: formData.get("location") || undefined,
     date_received: formData.get("date_received"),
     manufacture_date: formData.get("manufacture_date") || undefined,
     expiration_date: formData.get("expiration_date") || undefined,
@@ -226,7 +229,26 @@ export async function createIngredient(formData: FormData) {
     to_base_factor: Number(ozUnit.to_base_factor),
   });
 
-  // 1. Product master
+  // 1. Resolve or create the sub-location for this product. Upsert by the
+  //    natural key (location_id, shelf, level, spot) so concurrent submissions
+  //    don't collide on the unique constraint.
+  const { data: upserted, error: subErr } = await supabase
+    .from("sub_locations")
+    .upsert(
+      {
+        location_id: v.room_id,
+        shelf: v.shelf,
+        level: v.level,
+        spot: v.spot,
+      },
+      { onConflict: "location_id,shelf,level,spot" },
+    )
+    .select("id")
+    .single();
+  if (subErr) throw new Error(`Could not resolve sub-location: ${subErr.message}`);
+  const subLocationId = upserted.id;
+
+  // 2. Product master
   const { data: product, error: productErr } = await supabase
     .from("products")
     .insert({
@@ -241,6 +263,7 @@ export async function createIngredient(formData: FormData) {
       broker_item_no: v.broker_item_no ?? null,
       allergen: v.allergen ?? null,
       category: v.category ?? null,
+      sub_location_id: subLocationId,
       created_by: userId,
       updated_by: userId,
     })
@@ -248,7 +271,7 @@ export async function createIngredient(formData: FormData) {
     .single();
   if (productErr) throw new Error(productErr.message);
 
-  // 2. First lot
+  // 3. First lot
   const { data: lot, error: lotErr } = await supabase
     .from("lots")
     .insert({
@@ -257,14 +280,13 @@ export async function createIngredient(formData: FormData) {
       received_on: v.date_received,
       manufacture_date: v.manufacture_date ?? null,
       expires_on: v.expiration_date ?? null,
-      location: v.location ?? null,
       created_by: userId,
     })
     .select("id")
     .single();
   if (lotErr) throw new Error(lotErr.message);
 
-  // 3. Check-in movement for the amount received
+  // 4. Check-in movement for the amount received
   const { error: movementErr } = await supabase.from("movements").insert({
     product_id: product.id,
     lot_id: lot.id,

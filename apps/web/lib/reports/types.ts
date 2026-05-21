@@ -20,6 +20,8 @@ export type ReportInventoryDetailedRow = {
   is_expired: boolean;
   on_hand_display: number;
   display_unit: string;
+  sub_location_code: string;
+  room_name: string;
 };
 
 export type ReportPhysicalCountSheetRow = {

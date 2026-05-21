@@ -57,6 +57,8 @@ export const REPORTS: ReportDef[] = [
       { key: "is_expired", label: "Expired" },
       { key: "on_hand_display", label: "On Hand", numeric: true },
       { key: "display_unit", label: "Unit" },
+      { key: "sub_location_code", label: "Sub-Location" },
+      { key: "room_name", label: "Room" },
     ],
   },
   {

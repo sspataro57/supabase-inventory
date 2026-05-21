@@ -16,16 +16,30 @@ const ALLERGENS = [
   "Sesame",
 ];
 const CATEGORIES = ["Flour", "Sugar", "Oil", "Dairy", "Spice", "Liquid", "Other"];
-const LOCATIONS = ["Dry Storage", "Refrigerator", "Freezer", "Other"];
+
+export type RoomOption = { id: string; code: string; name: string };
 
 type Props = {
   action: (formData: FormData) => Promise<void>;
+  rooms: RoomOption[];
 };
 
-export function NewIngredientForm({ action }: Props) {
+const pad2 = (n: string) => (n.length === 1 ? `0${n}` : n);
+
+export function NewIngredientForm({ action, rooms }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [roomId, setRoomId] = useState<string>("");
+  const [shelf, setShelf] = useState<string>("");
+  const [level, setLevel] = useState<string>("");
+  const [spot, setSpot] = useState<string>("");
   const today = new Date().toISOString().slice(0, 10);
+
+  const selectedRoom = rooms.find((r) => r.id === roomId);
+  const codePreview =
+    selectedRoom && shelf && level && spot
+      ? `${selectedRoom.code}-${shelf.toUpperCase()}-${pad2(level)}-${pad2(spot)}`
+      : null;
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -79,13 +93,74 @@ export function NewIngredientForm({ action }: Props) {
         </div>
       </Section>
 
+      <Section title="Location">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <Field label="Room" required>
+            <select
+              name="room_id"
+              required
+              value={roomId}
+              onChange={(e) => setRoomId(e.target.value)}
+              className={input}
+            >
+              <option value="">— select —</option>
+              {rooms.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Shelf" required>
+            <input
+              name="shelf"
+              required
+              maxLength={1}
+              pattern="[A-Za-z]"
+              value={shelf}
+              onChange={(e) => setShelf(e.target.value.toUpperCase())}
+              className={input}
+              placeholder="A"
+            />
+          </Field>
+          <Field label="Level" required>
+            <input
+              name="level"
+              type="number"
+              min={1}
+              max={99}
+              required
+              value={level}
+              onChange={(e) => setLevel(e.target.value)}
+              className={input}
+              placeholder="4"
+            />
+          </Field>
+          <Field label="Spot" required>
+            <input
+              name="spot"
+              type="number"
+              min={1}
+              max={99}
+              required
+              value={spot}
+              onChange={(e) => setSpot(e.target.value)}
+              className={input}
+              placeholder="2"
+            />
+          </Field>
+        </div>
+        {codePreview && (
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+            Sub-location code: <span className="font-mono">{codePreview}</span>
+          </p>
+        )}
+      </Section>
+
       <Section title="Received lot">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="Lot Code" required>
             <input name="lot_code" required className={input} />
-          </Field>
-          <Field label="Location">
-            <Select name="location" options={LOCATIONS} placeholder="— select —" />
           </Field>
           <Field label="Date received" required>
             <input name="date_received" type="date" required defaultValue={today} className={input} />

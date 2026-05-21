@@ -7,9 +7,16 @@
   "exports": {
     ".": "./src/index.ts",
     "./db": "./src/db.ts",
-    "./schemas/products": "./src/schemas/products.ts"
+    "./schemas/products": "./src/schemas/products.ts",
+    "./schemas/locations": "./src/schemas/locations.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
   },
   "dependencies": {
     "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.7"
   }
 }
