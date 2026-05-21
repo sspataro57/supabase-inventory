@@ -100,6 +100,17 @@ export type ReportAuditTrailRow = {
   diff: Record<string, unknown> | null;
 };
 
+export type ReportInventoryByLocationRow = {
+  location_code: string;
+  room_name: string;
+  sub_location_code: string | null;
+  product_count: number;
+  lot_count: number;
+  on_hand_mass_oz: number;
+  on_hand_volume_floz: number;
+  on_hand_count_ea: number;
+};
+
 export type AnyReportRow =
   | ReportInventoryPerProductRow
   | ReportInventoryDetailedRow
@@ -109,4 +120,5 @@ export type AnyReportRow =
   | ReportLowStockRow
   | ReportExpiringLotsRow
   | ReportDeadStockRow
-  | ReportAuditTrailRow;
+  | ReportAuditTrailRow
+  | ReportInventoryByLocationRow;

@@ -954,6 +954,10 @@ export type Database = {
         Args: { p_days_ahead?: number }
         Returns: Database["public"]["CompositeTypes"]["report_expiring_lots_row"][]
       }
+      report_inventory_by_location: {
+        Args: Record<PropertyKey, never>
+        Returns: Database["public"]["CompositeTypes"]["report_inventory_by_location_row"][]
+      }
       report_inventory_detailed: {
         Args: Record<PropertyKey, never>
         Returns: Database["public"]["CompositeTypes"]["report_inventory_detailed_row"][]
@@ -1079,6 +1083,16 @@ export type Database = {
         is_expired: boolean | null
         on_hand_display: number | null
         display_unit: string | null
+      }
+      report_inventory_by_location_row: {
+        location_code: string | null
+        room_name: string | null
+        sub_location_code: string | null
+        product_count: number | null
+        lot_count: number | null
+        on_hand_mass_oz: number | null
+        on_hand_volume_floz: number | null
+        on_hand_count_ea: number | null
       }
       report_inventory_detailed_row: {
         product_id: string | null
