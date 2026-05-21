@@ -66,6 +66,12 @@ export default async function ReportPage({
         )}
       </div>
 
+      {report.helpText && (
+        <p className="text-sm text-gray-600 dark:text-gray-300 max-w-3xl">
+          {report.helpText}
+        </p>
+      )}
+
       {/* Param form */}
       {report.params.length > 0 && (
         <form method="GET" className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-4">

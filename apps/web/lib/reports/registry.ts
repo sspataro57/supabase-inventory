@@ -17,6 +17,7 @@ export type ReportDef = {
   slug: string;
   name: string;
   description: string;
+  helpText?: string;
   isAdminOnly: boolean;
   params: ReportParam[];
   rpcName: string;
@@ -198,8 +199,10 @@ export const REPORTS: ReportDef[] = [
   },
   {
     slug: "audit-trail",
-    name: "Audit Trail",
-    description: "Catalog, preference, and role changes for a date range.",
+    name: "Change Log",
+    description: "Who changed what in the catalog, in user roles, or in app preferences — over a date range.",
+    helpText:
+      "Use this report to answer questions like \"who changed the reorder point on item X last week?\" or \"when was that user made an admin?\". It surfaces administrative changes to ingredients (create / update / archive / import), user role changes, and app preference updates. It does NOT show stock movements — use the Movement Ledger or Movements Summary for inventory in/out.",
     isAdminOnly: true,
     params: [
       { type: "date", name: "p_from", label: "From", default: thirtyDaysAgo() },
