@@ -227,7 +227,7 @@ function psql(sql: string): string {
 function createTestAuthUser(email: string): string {
   const sql =
     `INSERT INTO auth.users ` +
-    `(id, email, encrypted_password, confirmed_at, role, aud, created_at, updated_at) ` +
+    `(id, email, encrypted_password, email_confirmed_at, role, aud, created_at, updated_at) ` +
     `VALUES (gen_random_uuid(), '${email}', '', now(), 'authenticated', 'authenticated', now(), now()) ` +
     `RETURNING id;`;
 
