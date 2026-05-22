@@ -72,12 +72,6 @@ export function NewIngredientForm({ action, rooms }: Props) {
           <Field label="Name" required>
             <input name="name" required className={input} placeholder="All-Purpose Flour" />
           </Field>
-          <Field label="Category">
-            <Select name="category" options={CATEGORIES} placeholder="— select —" />
-          </Field>
-          <Field label="Allergen">
-            <Select name="allergen" options={ALLERGENS} placeholder="— select —" />
-          </Field>
           <Field label="Manufacturer">
             <input name="manufacturer" className={input} />
           </Field>
@@ -89,6 +83,12 @@ export function NewIngredientForm({ action, rooms }: Props) {
           </Field>
           <Field label="Broker item #">
             <input name="broker_item_no" className={input} />
+          </Field>
+          <Field label="Allergen">
+            <Select name="allergen" options={ALLERGENS} placeholder="— select —" />
+          </Field>
+          <Field label="Category">
+            <Select name="category" options={CATEGORIES} placeholder="— select —" />
           </Field>
         </div>
       </Section>
