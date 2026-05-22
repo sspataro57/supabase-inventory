@@ -145,7 +145,10 @@ export default async function CatalogPage({
           Low stock only
         </label>
         {isAdmin && (
-          <label className="flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 cursor-pointer">
+          <label
+            title="Also show ingredients that have been archived (hidden from the normal catalog). Open one to unarchive it."
+            className="flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 cursor-pointer"
+          >
             <input type="checkbox" name="archived" value="1" defaultChecked={showArchived} className="rounded" />
             Include archived
           </label>

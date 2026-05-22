@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { archiveProduct } from "@/app/(admin)/products/actions";
+import { archiveProduct, unarchiveProduct } from "@/app/(admin)/products/actions";
 import { resolveDisplayUnit, formatStock } from "@/lib/stock";
 
 export default async function ProductDetailPage({
@@ -48,6 +48,7 @@ export default async function ProductDetailPage({
 
   const isAdmin = profile?.role === "admin";
   const archiveAction = archiveProduct.bind(null, id);
+  const unarchiveAction = unarchiveProduct.bind(null, id);
 
   // Stock display
   const { data: units } = await supabase
@@ -112,8 +113,20 @@ export default async function ProductDetailPage({
       </div>
 
       {product.is_archived && (
-        <div className="mb-4 rounded-lg bg-amber-50 dark:bg-yellow-900/20 border border-amber-200 px-4 py-2 text-sm text-amber-700 dark:text-yellow-300">
-          This product is archived and hidden from the catalog.
+        <div className="mb-4 rounded-lg bg-amber-50 dark:bg-yellow-900/20 border border-amber-200 px-4 py-2 flex items-center justify-between gap-4">
+          <span className="text-sm text-amber-700 dark:text-yellow-300">
+            This product is archived and hidden from the catalog.
+          </span>
+          {isAdmin && (
+            <form action={unarchiveAction}>
+              <button
+                type="submit"
+                className="shrink-0 rounded-lg border border-amber-300 dark:border-yellow-700 px-3 py-1.5 text-sm font-medium text-amber-800 dark:text-yellow-200 hover:bg-amber-100 dark:hover:bg-yellow-900/30 transition-colors"
+              >
+                Unarchive
+              </button>
+            </form>
+          )}
         </div>
       )}
 
