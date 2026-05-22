@@ -136,12 +136,18 @@ export default async function DashboardPage() {
       {/* Charts */}
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-4">
-          <h2 className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-4">Movements — last 30 days</h2>
+          <h2 className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-0.5">Movements — last 30 days</h2>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
+            Number of check-in and check-out events per day — counts of movements, not quantities.
+          </p>
           <MovementsChart data={chartData} />
         </section>
 
         <section className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-4">
-          <h2 className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-4">Top movers — last 30 days</h2>
+          <h2 className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-0.5">Top movers — last 30 days</h2>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
+            Ingredients ranked by number of movement events — counts of movements, not quantities.
+          </p>
           {topMovers.length > 0
             ? <TopMoversChart data={topMovers} />
             : <p className="text-sm text-gray-400 dark:text-gray-500 py-8 text-center">No movements yet.</p>
