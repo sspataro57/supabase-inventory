@@ -338,3 +338,32 @@ export async function archiveProduct(productId: string) {
   revalidatePath("/catalog");
   redirect("/catalog");
 }
+
+export async function unarchiveProduct(productId: string) {
+  const { supabase, userId } = await getAdminClient();
+
+  const { data: before } = await supabase
+    .from("products")
+    .select("name, sku, is_archived")
+    .eq("id", productId)
+    .single();
+
+  const { error } = await supabase
+    .from("products")
+    .update({ is_archived: false, updated_by: userId, updated_at: new Date().toISOString() })
+    .eq("id", productId);
+
+  if (error) throw new Error(error.message);
+
+  await writeAudit(supabase, {
+    actorId: userId,
+    action: "product.unarchive",
+    entityType: "product",
+    entityId: productId,
+    before,
+    after: { is_archived: false },
+  });
+
+  revalidatePath("/catalog");
+  redirect(`/catalog/${productId}`);
+}
