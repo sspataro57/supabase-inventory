@@ -1,0 +1,34 @@
+name: Validate DB Migrations
+
+on:
+  pull_request:
+    paths:
+      - "supabase/migrations/**"
+      - "supabase/seed.sql"
+      - "supabase/config.toml"
+      - "packages/shared/src/db.ts"
+      - ".github/workflows/validate-db.yml"
+
+jobs:
+  validate:
+    name: Apply migrations + check types
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      # `supabase db start` boots the local Postgres stack via Docker
+      # and applies every file in supabase/migrations/ + seed.sql.
+      # Any migration that fails to apply fails the step.
+      - name: Start local Supabase (applies migrations + seed)
+        run: supabase db start
+
+      # Regenerate types from the freshly migrated DB and fail if the
+      # committed packages/shared/src/db.ts is out of sync.
+      - name: Verify generated types are up to date
+        run: |
+          supabase gen types typescript --local > /tmp/db.ts.fresh
+          diff -u packages/shared/src/db.ts /tmp/db.ts.fresh
