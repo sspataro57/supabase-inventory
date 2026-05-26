@@ -7,6 +7,9 @@ node_modules/
 .env.local
 .env.*.local
 
+# CI/deploy secrets staged locally (mirror of GitHub Actions secrets)
+.secrets/
+
 # Next.js
 apps/web/.next/
 apps/web/out/
