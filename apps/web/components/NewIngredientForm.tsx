@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-const INVENTORY_TYPES = ["Raw Material", "Packaging", "Finished Good"];
+const INVENTORY_TYPES = ["RM Commercial", "RM Non-Commercial", "Finished Good", "Packaging"];
 const ALLERGENS = [
   "None",
   "Wheat",
