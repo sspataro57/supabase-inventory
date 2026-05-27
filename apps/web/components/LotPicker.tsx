@@ -4,7 +4,7 @@ import { useState } from "react";
 
 type LotOption = {
   id: string;
-  lot_code: string;
+  lot_code: string | null;
   expires_on: string | null;
   received_on: string;
   base_on_hand: number;
@@ -39,7 +39,7 @@ export function LotPicker({ lots, defaultLotId, required }: Props) {
           <option value="">— Select lot —</option>
           {lots.map((l) => (
             <option key={l.id} value={l.id}>
-              {l.lot_code}
+              {l.lot_code ?? "N/A"}
               {l.expires_on ? ` · exp ${l.expires_on}` : ""}
               {` · ${l.on_hand_display} on hand`}
             </option>

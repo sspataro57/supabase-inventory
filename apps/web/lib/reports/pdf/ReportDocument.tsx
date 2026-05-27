@@ -53,7 +53,7 @@ type Props = {
 };
 
 function formatCell(value: unknown, col: ColDef): string {
-  if (value === null || value === undefined) return "";
+  if (value === null || value === undefined) return col.key === "lot_code" ? "N/A" : "";
   if (typeof value === "boolean") return value ? "Yes" : "No";
   if (col.date && typeof value === "string") {
     const d = new Date(value);

@@ -7,7 +7,7 @@ type UnitOption = { code: string; display_name: string };
 
 type LotOption = {
   id: string;
-  lot_code: string;
+  lot_code: string | null;
   expires_on: string | null;
   received_on: string;
   base_on_hand: number;
