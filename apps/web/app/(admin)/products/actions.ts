@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { writeAudit } from "@/lib/audit";
 import { toBase } from "@/lib/units/convert";
-import { NewIngredientFormSchema, ProductFormSchema } from "@inventory/shared/schemas/products";
+import { NewIngredientFormSchema, OTHER_ROOM_SENTINEL, ProductFormSchema } from "@inventory/shared/schemas/products";
 
 async function getAdminClient() {
   const supabase = await createClient();
@@ -201,6 +201,7 @@ export async function createIngredient(formData: FormData) {
     allergen: formData.get("allergen") || undefined,
     category: formData.get("category") || undefined,
     room_id: formData.get("room_id"),
+    custom_location_text: formData.get("custom_location_text") || undefined,
     shelf: formData.get("shelf"),
     level: formData.get("level"),
     spot: formData.get("spot"),
@@ -229,11 +230,19 @@ export async function createIngredient(formData: FormData) {
     to_base_factor: Number(ozUnit.to_base_factor),
   });
 
-  // 1. Resolve or create the sub-location only when the user filled all three
-  //    components. Room-only placements skip sub_locations entirely and link
-  //    products.location_id directly so the report fallback can find the room.
+  // 1. Resolve location. Three cases:
+  //    a. Real room + full sub-location: upsert sub_locations and link both.
+  //    b. Real room only: link products.location_id; sub_location_id null.
+  //    c. "Other": user typed a free-form label; store it in
+  //       custom_location_text, leave location_id and sub_location_id null.
+  const pickedOther = v.room_id === OTHER_ROOM_SENTINEL;
   let subLocationId: string | null = null;
-  if (v.shelf !== undefined && v.level !== undefined && v.spot !== undefined) {
+  if (
+    !pickedOther &&
+    v.shelf !== undefined &&
+    v.level !== undefined &&
+    v.spot !== undefined
+  ) {
     const { data: upserted, error: subErr } = await supabase
       .from("sub_locations")
       .upsert(
@@ -266,8 +275,9 @@ export async function createIngredient(formData: FormData) {
       broker_item_no: v.broker_item_no ?? null,
       allergen: v.allergen ?? null,
       category: v.category ?? null,
-      location_id: v.room_id,
+      location_id: pickedOther ? null : (v.room_id as string),
       sub_location_id: subLocationId,
+      custom_location_text: pickedOther ? (v.custom_location_text ?? null) : null,
       created_by: userId,
       updated_by: userId,
     })

@@ -124,45 +124,63 @@ export function NewIngredientForm({ action, rooms }: Props) {
                   {r.name}
                 </option>
               ))}
+              <option value="__OTHER__">Other…</option>
             </select>
           </Field>
-          <Field label="Shelf">
-            <input
-              name="shelf"
-              maxLength={1}
-              pattern="[A-Za-z]"
-              value={shelf}
-              onChange={(e) => setShelf(e.target.value.toUpperCase())}
-              className={input}
-              placeholder="A"
-            />
-          </Field>
-          <Field label="Level">
-            <input
-              name="level"
-              type="number"
-              min={1}
-              max={99}
-              value={level}
-              onChange={(e) => setLevel(e.target.value)}
-              className={input}
-              placeholder="4"
-            />
-          </Field>
-          <Field label="Spot">
-            <input
-              name="spot"
-              type="number"
-              min={1}
-              max={99}
-              value={spot}
-              onChange={(e) => setSpot(e.target.value)}
-              className={input}
-              placeholder="2"
-            />
-          </Field>
+          {roomId !== "__OTHER__" && (
+            <>
+              <Field label="Shelf">
+                <input
+                  name="shelf"
+                  maxLength={1}
+                  pattern="[A-Za-z]"
+                  value={shelf}
+                  onChange={(e) => setShelf(e.target.value.toUpperCase())}
+                  className={input}
+                  placeholder="A"
+                />
+              </Field>
+              <Field label="Level">
+                <input
+                  name="level"
+                  type="number"
+                  min={1}
+                  max={99}
+                  value={level}
+                  onChange={(e) => setLevel(e.target.value)}
+                  className={input}
+                  placeholder="4"
+                />
+              </Field>
+              <Field label="Spot">
+                <input
+                  name="spot"
+                  type="number"
+                  min={1}
+                  max={99}
+                  value={spot}
+                  onChange={(e) => setSpot(e.target.value)}
+                  className={input}
+                  placeholder="2"
+                />
+              </Field>
+            </>
+          )}
         </div>
-        {codePreview && (
+        {roomId === "__OTHER__" && (
+          <div className="mt-3">
+            <Field label="Describe location" required>
+              <input
+                name="custom_location_text"
+                required
+                className={input}
+                placeholder="developer desk, R&D Kitchen, laboratory…"
+                maxLength={120}
+              />
+            </Field>
+          </div>
+        )}
+        {codePreview && roomId !== "__OTHER__" && (
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
             Sub-location code: <span className="font-mono">{codePreview}</span>
           </p>
