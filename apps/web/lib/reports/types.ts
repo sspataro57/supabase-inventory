@@ -15,7 +15,7 @@ export type ReportInventoryDetailedRow = {
   sku: string;
   product_name: string;
   lot_id: string;
-  lot_code: string;
+  lot_code: string | null;
   expires_on: string | null;
   is_expired: boolean;
   on_hand_display: number;
@@ -70,7 +70,7 @@ export type ReportLowStockRow = {
 
 export type ReportExpiringLotsRow = {
   lot_id: string;
-  lot_code: string;
+  lot_code: string | null;
   product_id: string;
   sku: string;
   product_name: string;

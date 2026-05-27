@@ -276,7 +276,7 @@ export async function createIngredient(formData: FormData) {
     .from("lots")
     .insert({
       product_id: product.id,
-      lot_code: v.lot_code,
+      lot_code: v.lot_code ?? null,
       received_on: v.date_received,
       manufacture_date: v.manufacture_date ?? null,
       expires_on: v.expiration_date ?? null,
@@ -303,7 +303,7 @@ export async function createIngredient(formData: FormData) {
     action: "product.create",
     entityType: "product",
     entityId: product.id,
-    after: { sku: v.sku, name: v.name, lot_code: v.lot_code },
+    after: { sku: v.sku, name: v.name, lot_code: v.lot_code ?? null },
   });
 
   revalidatePath("/catalog");
