@@ -15,7 +15,22 @@ const ALLERGENS = [
   "Tree Nuts",
   "Wheat",
 ];
-const CATEGORIES = ["Flour", "Sugar", "Oil", "Dairy", "Spice", "Liquid", "Other"];
+const CATEGORIES = [
+  "Antifoam",
+  "Color",
+  "Culture",
+  "Dairy",
+  "Emulsifier",
+  "Enzyme",
+  "Fat/Oil/Shortening",
+  "Flavor",
+  "Nutrient",
+  "pH Control Agent",
+  "Preservative",
+  "Protein",
+  "Stabilizer/Thickener",
+  "Sweetener",
+];
 
 export type RoomOption = { id: string; code: string; name: string };
 
