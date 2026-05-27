@@ -4,16 +4,16 @@ import { useState } from "react";
 
 const INVENTORY_TYPES = ["RM Commercial", "RM Non-Commercial", "Finished Good", "Packaging"];
 const ALLERGENS = [
-  "None",
-  "Wheat",
-  "Egg",
+  "Crustacean Shellfish",
+  "Eggs",
+  "Fish",
   "Milk",
+  "None",
+  "Peanuts",
+  "Sesame",
   "Soy",
   "Tree Nuts",
-  "Peanuts",
-  "Fish",
-  "Shellfish",
-  "Sesame",
+  "Wheat",
 ];
 const CATEGORIES = ["Flour", "Sugar", "Oil", "Dairy", "Spice", "Liquid", "Other"];
 
