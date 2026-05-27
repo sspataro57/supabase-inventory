@@ -226,7 +226,7 @@ export default async function DashboardPage() {
                   className="flex items-center gap-4 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{l.lot_code}</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{l.lot_code ?? "N/A"}</p>
                     <p className="text-xs text-gray-400 dark:text-gray-500">expires {l.expires_on}</p>
                   </div>
                   <span
