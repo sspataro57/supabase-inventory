@@ -595,6 +595,7 @@ export type Database = {
           category: string | null
           created_at: string
           created_by: string | null
+          custom_location_text: string | null
           description: string | null
           display_unit: string | null
           embedding: string | null
@@ -625,6 +626,7 @@ export type Database = {
           category?: string | null
           created_at?: string
           created_by?: string | null
+          custom_location_text?: string | null
           description?: string | null
           display_unit?: string | null
           embedding?: string | null
@@ -655,6 +657,7 @@ export type Database = {
           category?: string | null
           created_at?: string
           created_by?: string | null
+          custom_location_text?: string | null
           description?: string | null
           display_unit?: string | null
           embedding?: string | null
