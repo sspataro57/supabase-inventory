@@ -54,7 +54,7 @@ export const NewIngredientFormSchema = z.object({
   level: LevelSchema,
   spot: SpotSchema,
   // Lot
-  lot_code: z.string().trim().min(1, "Lot Code is required"),
+  lot_code: optionalText,
   date_received: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, "Date received must be YYYY-MM-DD"),

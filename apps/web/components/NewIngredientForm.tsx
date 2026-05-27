@@ -159,8 +159,8 @@ export function NewIngredientForm({ action, rooms }: Props) {
 
       <Section title="Received lot">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="Lot Code" required>
-            <input name="lot_code" required className={input} />
+          <Field label="Lot Code">
+            <input name="lot_code" className={input} />
           </Field>
           <Field label="Date received" required>
             <input name="date_received" type="date" required defaultValue={today} className={input} />

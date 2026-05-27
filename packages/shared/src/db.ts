@@ -251,7 +251,7 @@ export type Database = {
           expires_on: string | null
           id: string
           is_archived: boolean
-          lot_code: string
+          lot_code: string | null
           manufacture_date: string | null
           notes: string | null
           product_id: string
@@ -263,7 +263,7 @@ export type Database = {
           expires_on?: string | null
           id?: string
           is_archived?: boolean
-          lot_code: string
+          lot_code?: string | null
           manufacture_date?: string | null
           notes?: string | null
           product_id: string
@@ -275,7 +275,7 @@ export type Database = {
           expires_on?: string | null
           id?: string
           is_archived?: boolean
-          lot_code?: string
+          lot_code?: string | null
           manufacture_date?: string | null
           notes?: string | null
           product_id?: string
