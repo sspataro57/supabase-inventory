@@ -603,6 +603,7 @@ export type Database = {
           id: string
           inventory_type: string | null
           is_archived: boolean
+          location_id: string | null
           manufacturer: string | null
           manufacturer_item_no: string | null
           measure_type: Database["public"]["Enums"]["measure_type"]
@@ -632,6 +633,7 @@ export type Database = {
           id?: string
           inventory_type?: string | null
           is_archived?: boolean
+          location_id?: string | null
           manufacturer?: string | null
           manufacturer_item_no?: string | null
           measure_type: Database["public"]["Enums"]["measure_type"]
@@ -661,6 +663,7 @@ export type Database = {
           id?: string
           inventory_type?: string | null
           is_archived?: boolean
+          location_id?: string | null
           manufacturer?: string | null
           manufacturer_item_no?: string | null
           measure_type?: Database["public"]["Enums"]["measure_type"]
@@ -689,6 +692,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "units"
             referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "products_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "products_sub_location_id_fkey"

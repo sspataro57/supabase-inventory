@@ -126,10 +126,9 @@ export function NewIngredientForm({ action, rooms }: Props) {
               ))}
             </select>
           </Field>
-          <Field label="Shelf" required>
+          <Field label="Shelf">
             <input
               name="shelf"
-              required
               maxLength={1}
               pattern="[A-Za-z]"
               value={shelf}
@@ -138,26 +137,24 @@ export function NewIngredientForm({ action, rooms }: Props) {
               placeholder="A"
             />
           </Field>
-          <Field label="Level" required>
+          <Field label="Level">
             <input
               name="level"
               type="number"
               min={1}
               max={99}
-              required
               value={level}
               onChange={(e) => setLevel(e.target.value)}
               className={input}
               placeholder="4"
             />
           </Field>
-          <Field label="Spot" required>
+          <Field label="Spot">
             <input
               name="spot"
               type="number"
               min={1}
               max={99}
-              required
               value={spot}
               onChange={(e) => setSpot(e.target.value)}
               className={input}
