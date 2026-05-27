@@ -1,5 +1,36 @@
 import { z } from "zod";
-import { ShelfSchema, LevelSchema, SpotSchema } from "./locations";
+import { ShelfSchema } from "./locations";
+
+const OptionalShelfSchema = z
+  .string()
+  .trim()
+  .optional()
+  .transform((v) => (v === "" || v === undefined ? undefined : v))
+  .pipe(z.union([z.undefined(), ShelfSchema]));
+
+// LevelSchema/SpotSchema coerce numbers but reject NaN; empty form fields come
+// in as "" so we hand-coerce here to preserve undefined.
+const optionalIntField = (min: number, max: number, label: string) =>
+  z
+    .string()
+    .trim()
+    .optional()
+    .transform((v) => (v === "" || v === undefined ? undefined : v))
+    .transform((v, ctx) => {
+      if (v === undefined) return undefined;
+      const n = Number(v);
+      if (!Number.isInteger(n) || n < min || n > max) {
+        ctx.addIssue({
+          code: "custom",
+          message: `${label} must be an integer between ${min} and ${max}`,
+        });
+        return z.NEVER;
+      }
+      return n;
+    });
+
+const OptionalLevelSchema = optionalIntField(1, 99, "Level");
+const OptionalSpotSchema = optionalIntField(1, 99, "Spot");
 
 export const BarcodeSchema = z.object({
   code: z.string().min(1, "Barcode value required"),
@@ -37,31 +68,43 @@ const optionalDate = z
     message: "Date must be YYYY-MM-DD",
   });
 
-export const NewIngredientFormSchema = z.object({
-  // Product master
-  sku: z.string().trim().min(1, "RM# is required"),
-  name: z.string().trim().min(1, "Name is required"),
-  inventory_type: optionalText,
-  manufacturer: optionalText,
-  manufacturer_item_no: optionalText,
-  broker: optionalText,
-  broker_item_no: optionalText,
-  allergen: optionalText,
-  category: optionalText,
-  // Sub-location (per product, not per lot)
-  room_id: z.string().uuid("Room is required"),
-  shelf: ShelfSchema,
-  level: LevelSchema,
-  spot: SpotSchema,
-  // Lot
-  lot_code: optionalText,
-  date_received: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date received must be YYYY-MM-DD"),
-  manufacture_date: optionalDate,
-  expiration_date: optionalDate,
-  // Movement (always recorded in oz)
-  amount_received_oz: z.coerce.number().positive("Amount received must be > 0"),
-});
+export const NewIngredientFormSchema = z
+  .object({
+    // Product master
+    sku: z.string().trim().min(1, "RM# is required"),
+    name: z.string().trim().min(1, "Name is required"),
+    inventory_type: optionalText,
+    manufacturer: optionalText,
+    manufacturer_item_no: optionalText,
+    broker: optionalText,
+    broker_item_no: optionalText,
+    allergen: optionalText,
+    category: optionalText,
+    // Location: room required; sub-location (shelf/level/spot) optional but
+    // all-or-none.
+    room_id: z.string().uuid("Room is required"),
+    shelf: OptionalShelfSchema,
+    level: OptionalLevelSchema,
+    spot: OptionalSpotSchema,
+    // Lot
+    lot_code: optionalText,
+    date_received: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Date received must be YYYY-MM-DD"),
+    manufacture_date: optionalDate,
+    expiration_date: optionalDate,
+    // Movement (always recorded in oz)
+    amount_received_oz: z.coerce.number().positive("Amount received must be > 0"),
+  })
+  .refine(
+    (v) => {
+      const filled = [v.shelf, v.level, v.spot].filter((x) => x !== undefined).length;
+      return filled === 0 || filled === 3;
+    },
+    {
+      message: "Shelf, Level and Spot must all be filled together (or all left blank)",
+      path: ["shelf"],
+    },
+  );
 
 export type NewIngredientFormValues = z.infer<typeof NewIngredientFormSchema>;

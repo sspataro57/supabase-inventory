@@ -229,24 +229,27 @@ export async function createIngredient(formData: FormData) {
     to_base_factor: Number(ozUnit.to_base_factor),
   });
 
-  // 1. Resolve or create the sub-location for this product. Upsert by the
-  //    natural key (location_id, shelf, level, spot) so concurrent submissions
-  //    don't collide on the unique constraint.
-  const { data: upserted, error: subErr } = await supabase
-    .from("sub_locations")
-    .upsert(
-      {
-        location_id: v.room_id,
-        shelf: v.shelf,
-        level: v.level,
-        spot: v.spot,
-      },
-      { onConflict: "location_id,shelf,level,spot" },
-    )
-    .select("id")
-    .single();
-  if (subErr) throw new Error(`Could not resolve sub-location: ${subErr.message}`);
-  const subLocationId = upserted.id;
+  // 1. Resolve or create the sub-location only when the user filled all three
+  //    components. Room-only placements skip sub_locations entirely and link
+  //    products.location_id directly so the report fallback can find the room.
+  let subLocationId: string | null = null;
+  if (v.shelf !== undefined && v.level !== undefined && v.spot !== undefined) {
+    const { data: upserted, error: subErr } = await supabase
+      .from("sub_locations")
+      .upsert(
+        {
+          location_id: v.room_id,
+          shelf: v.shelf,
+          level: v.level,
+          spot: v.spot,
+        },
+        { onConflict: "location_id,shelf,level,spot" },
+      )
+      .select("id")
+      .single();
+    if (subErr) throw new Error(`Could not resolve sub-location: ${subErr.message}`);
+    subLocationId = upserted.id;
+  }
 
   // 2. Product master
   const { data: product, error: productErr } = await supabase
@@ -263,6 +266,7 @@ export async function createIngredient(formData: FormData) {
       broker_item_no: v.broker_item_no ?? null,
       allergen: v.allergen ?? null,
       category: v.category ?? null,
+      location_id: v.room_id,
       sub_location_id: subLocationId,
       created_by: userId,
       updated_by: userId,
