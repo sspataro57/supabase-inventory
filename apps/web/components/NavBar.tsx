@@ -12,7 +12,8 @@ type Profile = {
 export function NavBar({ profile }: { profile: Profile }) {
   const [open, setOpen] = useState(false);
   const isAdmin = profile.role === "admin";
-  const displayName = profile.display_name ?? profile.email;
+  const displayName =
+    profile.display_name ?? profile.email.split("@")[0] ?? profile.email;
 
   const links = [
     { href: "/dashboard", label: "Dashboard" },
