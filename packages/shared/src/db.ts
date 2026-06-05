@@ -927,7 +927,11 @@ export type Database = {
         }
       }
       report_inventory_per_product: {
-        Args: never
+        Args: {
+          p_inventory_type?: string | null
+          p_allergen?: string | null
+          p_category?: string | null
+        }
         Returns: Database["public"]["CompositeTypes"]["report_inventory_per_product_row"][]
         SetofOptions: {
           from: "*"
@@ -1059,6 +1063,14 @@ export type Database = {
         product_id: string | null
         sku: string | null
         name: string | null
+        inventory_type: string | null
+        manufacturer: string | null
+        manufacturer_item_no: string | null
+        broker: string | null
+        broker_item_no: string | null
+        allergen: string | null
+        category: string | null
+        location: string | null
         display_unit: string | null
         on_hand_display: number | null
         reorder_point_display: number | null

@@ -11,13 +11,17 @@ const W = {
 };
 
 export const PDF_COLUMNS: Record<string, ColDef[]> = {
+  // Curated subset that fits landscape-letter width. The on-screen table and CSV
+  // export show every field (#150); the PDF keeps the most useful columns.
   "inventory-per-product": [
     { key: "sku",                  label: "RM#",         width: W.sm },
-    { key: "name",                 label: "Ingredient",     width: W.xxl },
+    { key: "name",                 label: "Ingredient",  width: W.lg },
+    { key: "inventory_type",       label: "Inv Type",    width: W.md },
+    { key: "allergen",             label: "Allergen",    width: W.sm },
+    { key: "category",             label: "Category",    width: W.md },
+    { key: "location",             label: "Location",    width: W.md },
     { key: "on_hand_display",      label: "On Hand",     width: W.sm, numeric: true },
     { key: "display_unit",         label: "Unit",        width: W.xs },
-    { key: "reorder_point_display",label: "Reorder At",  width: W.sm, numeric: true },
-    { key: "reorder_qty_display",  label: "Order Qty",   width: W.sm, numeric: true },
     { key: "is_low_stock",         label: "Low Stock",   width: W.sm },
     { key: "lot_count",            label: "Lots",        width: W.xs, numeric: true },
   ],
