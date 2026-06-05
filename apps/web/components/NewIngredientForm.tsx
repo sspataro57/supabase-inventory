@@ -34,14 +34,50 @@ const CATEGORIES = [
 
 export type RoomOption = { id: string; code: string; name: string };
 
+export type IngredientSuggestions = {
+  name: string[];
+  manufacturer: string[];
+  manufacturer_item_no: string[];
+  broker: string[];
+  broker_item_no: string[];
+  lot_code: string[];
+};
+
 type Props = {
   action: (formData: FormData) => Promise<void>;
   rooms: RoomOption[];
+  suggestions?: IngredientSuggestions;
 };
 
 const pad2 = (n: string) => (n.length === 1 ? `0${n}` : n);
 
-export function NewIngredientForm({ action, rooms }: Props) {
+// #142: accept Excel-style short dates (1/7/26, 1-7-2026) and normalize to the
+// ISO YYYY-MM-DD the form/schema expects. Returns "" if it can't be parsed, so
+// the caller can leave the raw text for the user to correct.
+export function normalizeDate(raw: string): string {
+  const v = raw.trim();
+  if (v === "") return "";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v; // already ISO
+  const m = v.match(/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{2}|\d{4})$/);
+  if (!m) return "";
+  const month = Number(m[1]);
+  const day = Number(m[2]);
+  let year = Number(m[3]);
+  if (m[3].length === 2) year += 2000;
+  if (month < 1 || month > 12 || day < 1 || day > 31) return "";
+  return `${year}-${pad2(String(month))}-${pad2(String(day))}`;
+}
+
+const EMPTY_SUGGESTIONS: IngredientSuggestions = {
+  name: [],
+  manufacturer: [],
+  manufacturer_item_no: [],
+  broker: [],
+  broker_item_no: [],
+  lot_code: [],
+};
+
+export function NewIngredientForm({ action, rooms, suggestions = EMPTY_SUGGESTIONS }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [roomId, setRoomId] = useState<string>("");
@@ -76,6 +112,14 @@ export function NewIngredientForm({ action, rooms }: Props) {
         </div>
       )}
 
+      {/* #141: autocomplete suggestions from previously entered values */}
+      <SuggestionList id="dl-name" options={suggestions.name} />
+      <SuggestionList id="dl-manufacturer" options={suggestions.manufacturer} />
+      <SuggestionList id="dl-manufacturer_item_no" options={suggestions.manufacturer_item_no} />
+      <SuggestionList id="dl-broker" options={suggestions.broker} />
+      <SuggestionList id="dl-broker_item_no" options={suggestions.broker_item_no} />
+      <SuggestionList id="dl-lot_code" options={suggestions.lot_code} />
+
       <Section title="Ingredient">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="Inventory type">
@@ -85,19 +129,19 @@ export function NewIngredientForm({ action, rooms }: Props) {
             <input name="sku" required className={input} placeholder="RM-001" />
           </Field>
           <Field label="Name" required>
-            <input name="name" required className={input} placeholder="All-Purpose Flour" />
+            <input name="name" required list="dl-name" autoComplete="off" className={input} placeholder="All-Purpose Flour" />
           </Field>
           <Field label="Manufacturer">
-            <input name="manufacturer" className={input} />
+            <input name="manufacturer" list="dl-manufacturer" autoComplete="off" className={input} />
           </Field>
           <Field label="Manufacturer item #">
-            <input name="manufacturer_item_no" className={input} />
+            <input name="manufacturer_item_no" list="dl-manufacturer_item_no" autoComplete="off" className={input} />
           </Field>
           <Field label="Broker">
-            <input name="broker" className={input} />
+            <input name="broker" list="dl-broker" autoComplete="off" className={input} />
           </Field>
           <Field label="Broker item #">
-            <input name="broker_item_no" className={input} />
+            <input name="broker_item_no" list="dl-broker_item_no" autoComplete="off" className={input} />
           </Field>
           <Field label="Allergen">
             <Select name="allergen" options={ALLERGENS} placeholder="— select —" />
@@ -190,16 +234,16 @@ export function NewIngredientForm({ action, rooms }: Props) {
       <Section title="Received lot">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="Lot Code">
-            <input name="lot_code" className={input} />
+            <input name="lot_code" list="dl-lot_code" autoComplete="off" className={input} />
           </Field>
           <Field label="Date received" required>
-            <input name="date_received" type="date" required defaultValue={today} className={input} />
+            <SmartDateField name="date_received" required defaultValue={today} />
           </Field>
           <Field label="Manufacture date">
-            <input name="manufacture_date" type="date" className={input} />
+            <SmartDateField name="manufacture_date" />
           </Field>
           <Field label="Expiration date">
-            <input name="expiration_date" type="date" className={input} />
+            <SmartDateField name="expiration_date" />
           </Field>
           <Field label="Amount received (oz)" required>
             <input
@@ -223,6 +267,53 @@ export function NewIngredientForm({ action, rooms }: Props) {
         {pending ? "Saving…" : "Create ingredient"}
       </button>
     </form>
+  );
+}
+
+function SuggestionList({ id, options }: { id: string; options: string[] }) {
+  if (options.length === 0) return null;
+  return (
+    <datalist id={id}>
+      {options.map((opt) => (
+        <option key={opt} value={opt} />
+      ))}
+    </datalist>
+  );
+}
+
+/**
+ * #142: a date field that accepts Excel-style short dates. The user can type
+ * "1/7/26" (or 1-7-2026, or a full YYYY-MM-DD); on blur it normalizes to ISO
+ * (2026-01-07). The posted value is whatever the input holds after the blur
+ * normalization, and the Zod schema validates YYYY-MM-DD server-side.
+ */
+function SmartDateField({
+  name,
+  required,
+  defaultValue = "",
+}: {
+  name: string;
+  required?: boolean;
+  defaultValue?: string;
+}) {
+  const [value, setValue] = useState(defaultValue);
+  return (
+    <>
+      <input
+        name={name}
+        required={required}
+        value={value}
+        inputMode="numeric"
+        placeholder="MM/DD/YY or YYYY-MM-DD"
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={() => {
+          const norm = normalizeDate(value);
+          if (norm) setValue(norm);
+        }}
+        className={input}
+      />
+      <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">e.g. 1/7/26 → 2026-01-07</p>
+    </>
   );
 }
 
