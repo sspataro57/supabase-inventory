@@ -283,7 +283,17 @@ export async function createIngredient(formData: FormData) {
     })
     .select("id")
     .single();
-  if (productErr) throw new Error(productErr.message);
+  if (productErr) {
+    // Uniqueness is now per (RM#, Inventory Type) — #146. Give a clear message
+    // instead of the raw Postgres constraint error on a duplicate.
+    if (productErr.code === "23505") {
+      throw new Error(
+        `An ingredient with RM# "${v.sku}" and this Inventory Type already exists. ` +
+          `The same RM# is only allowed once per Inventory Type.`,
+      );
+    }
+    throw new Error(productErr.message);
+  }
 
   // 3. First lot
   const { data: lot, error: lotErr } = await supabase
