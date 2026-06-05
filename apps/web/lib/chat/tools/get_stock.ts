@@ -25,17 +25,24 @@ export const getStockTool: ToolDef = {
 
     const displayUnit = resolveDisplayUnit(product.measure_type, product.display_unit, prefs);
     const unitRow = (units ?? []).find((u) => u.code === displayUnit);
-    const onHand = unitRow
-      ? formatStock(Number(stock.base_on_hand), Number(unitRow.to_base_factor), displayUnit)
+    const factor = unitRow ? Number(unitRow.to_base_factor) : null;
+    const onHand = factor
+      ? formatStock(Number(stock.base_on_hand), factor, displayUnit)
       : `${stock.base_on_hand} (base)`;
+    // reorder_point is stored in base units; present it in the display unit too.
+    const reorderPoint =
+      stock.reorder_point != null && factor
+        ? formatStock(Number(stock.reorder_point), factor, displayUnit)
+        : null;
 
+    // NOTE: intentionally NOT returning the raw base quantity — the model used
+    // to quote it (grams) as if it were the display unit (#154).
     return {
       product: { name: product.name, sku: product.sku },
       on_hand: onHand,
-      on_hand_base: stock.base_on_hand,
       display_unit: displayUnit,
       is_low_stock: stock.is_low_stock,
-      reorder_point: stock.reorder_point,
+      reorder_point: reorderPoint,
     };
   },
 };
