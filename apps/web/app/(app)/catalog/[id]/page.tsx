@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { archiveProduct, unarchiveProduct } from "@/app/(admin)/products/actions";
 import { resolveDisplayUnit, formatStock } from "@/lib/stock";
+import { DeleteIngredientButton } from "./DeleteIngredientButton";
 
 export default async function ProductDetailPage({
   params,
@@ -99,14 +100,7 @@ export default async function ProductDetailPage({
               Edit
             </Link>
             {!product.is_archived && (
-              <form action={archiveAction}>
-                <button
-                  type="submit"
-                  className="rounded-lg border border-red-200 dark:border-red-800 px-3 py-1.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                >
-                  Archive
-                </button>
-              </form>
+              <DeleteIngredientButton action={archiveAction} name={product.name} />
             )}
           </div>
         )}
