@@ -202,10 +202,13 @@ export async function createIngredient(formData: FormData) {
     category: formData.get("category") || undefined,
     room_id: formData.get("room_id"),
     custom_location_text: formData.get("custom_location_text") || undefined,
-    shelf: formData.get("shelf"),
-    level: formData.get("level"),
-    spot: formData.get("spot"),
-    lot_code: formData.get("lot_code"),
+    // When "Other" room is picked, the shelf/level/spot inputs are removed from
+    // the DOM, so formData.get() returns null. The Zod optional string schemas
+    // reject null (only undefined), so coerce absent fields to undefined.
+    shelf: formData.get("shelf") || undefined,
+    level: formData.get("level") || undefined,
+    spot: formData.get("spot") || undefined,
+    lot_code: formData.get("lot_code") || undefined,
     date_received: formData.get("date_received"),
     manufacture_date: formData.get("manufacture_date") || undefined,
     expiration_date: formData.get("expiration_date") || undefined,
