@@ -71,6 +71,18 @@ export default async function DashboardPage() {
     } as never),
   ]);
 
+  // #144: the "Expiring within 30 days" box only had lot_code/date/days. Look up
+  // the ingredient name + RM# (sku) for each expiring lot. lot_stock is a view,
+  // so we resolve products in a follow-up query rather than a PostgREST embed.
+  const expiringProductIds = [...new Set((expiringSoon ?? []).map((l) => l.product_id))];
+  const { data: expiringProductsRaw } =
+    expiringProductIds.length > 0
+      ? await supabase.from("products").select("id, name, sku").in("id", expiringProductIds)
+      : { data: [] };
+  const expiringProductMap = new Map(
+    (expiringProductsRaw ?? []).map((p) => [p.id, { name: p.name, sku: p.sku }]),
+  );
+
   // Movements today count
   type SummaryRow = { day: string; n_check_ins: number; n_check_outs: number; product_name: string };
   const summaryRows = (movementsDailyRaw as SummaryRow[] | null) ?? [];
@@ -219,6 +231,7 @@ export default async function DashboardPage() {
               const daysLeft = Math.ceil(
                 (new Date(l.expires_on!).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
               );
+              const prod = expiringProductMap.get(l.product_id);
               return (
                 <Link
                   key={l.lot_id}
@@ -226,7 +239,13 @@ export default async function DashboardPage() {
                   className="flex items-center gap-4 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">{l.lot_code ?? "N/A"}</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">
+                      {prod?.name ?? "Unknown ingredient"}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                      {prod?.sku ? `RM# ${prod.sku}` : ""}
+                      {prod?.sku ? " · " : ""}Lot {l.lot_code ?? "N/A"}
+                    </p>
                     <p className="text-xs text-gray-400 dark:text-gray-500">expires {l.expires_on}</p>
                   </div>
                   <span

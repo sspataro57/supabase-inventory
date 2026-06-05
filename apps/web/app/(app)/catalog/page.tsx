@@ -77,7 +77,7 @@ export default async function CatalogPage({
     let stockQuery = supabase
       .from("product_stock")
       .select("product_id, sku, name, measure_type, display_unit, base_on_hand, reorder_point, is_low_stock")
-      .order("name");
+      .order("sku");
 
     if (showLowStock) stockQuery = stockQuery.eq("is_low_stock", true);
     if (q) stockQuery = stockQuery.or(`name.ilike.%${q}%,sku.ilike.%${q}%`);
@@ -97,7 +97,7 @@ export default async function CatalogPage({
       .from("products")
       .select("id, sku, name, measure_type, display_unit")
       .eq("is_archived", true)
-      .order("name");
+      .order("sku");
     if (q) archivedQ = archivedQ.or(`name.ilike.%${q}%,sku.ilike.%${q}%`);
     if (roomFilteredProductIds !== null) archivedQ = archivedQ.in("id", roomFilteredProductIds);
     const { data } = await archivedQ;

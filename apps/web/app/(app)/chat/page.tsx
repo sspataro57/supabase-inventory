@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { ConversationRow } from "./ConversationRow";
 
 export default async function ChatListPage() {
   const supabase = await createClient();
@@ -39,18 +40,7 @@ export default async function ChatListPage() {
       ) : (
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-700">
           {conversations.map((c) => (
-            <Link
-              key={c.id}
-              href={`/chat/${c.id}`}
-              className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-            >
-              <p className="text-sm text-gray-900 dark:text-gray-50 truncate flex-1">
-                {c.title ?? "Untitled conversation"}
-              </p>
-              <span className="text-xs text-gray-300 dark:text-gray-600 shrink-0 ml-3">
-                {new Date(c.updated_at).toLocaleDateString()}
-              </span>
-            </Link>
+            <ConversationRow key={c.id} id={c.id} title={c.title} updatedAt={c.updated_at} />
           ))}
         </div>
       )}

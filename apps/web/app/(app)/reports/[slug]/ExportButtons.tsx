@@ -37,14 +37,14 @@ export function ExportButtons({ slug, params }: { slug: string; params: ReportPa
         disabled={loading !== null}
         className="rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50"
       >
-        {loading === "csv" ? "Generating…" : "CSV"}
+        {loading === "csv" ? "Generating…" : "⬇ Download CSV"}
       </button>
       <button
         onClick={() => download("pdf")}
         disabled={loading !== null}
         className="rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50"
       >
-        {loading === "pdf" ? "Generating…" : "PDF"}
+        {loading === "pdf" ? "Generating…" : "⬇ Download PDF"}
       </button>
     </div>
   );

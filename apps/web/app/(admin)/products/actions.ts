@@ -202,10 +202,13 @@ export async function createIngredient(formData: FormData) {
     category: formData.get("category") || undefined,
     room_id: formData.get("room_id"),
     custom_location_text: formData.get("custom_location_text") || undefined,
-    shelf: formData.get("shelf"),
-    level: formData.get("level"),
-    spot: formData.get("spot"),
-    lot_code: formData.get("lot_code"),
+    // When "Other" room is picked, the shelf/level/spot inputs are removed from
+    // the DOM, so formData.get() returns null. The Zod optional string schemas
+    // reject null (only undefined), so coerce absent fields to undefined.
+    shelf: formData.get("shelf") || undefined,
+    level: formData.get("level") || undefined,
+    spot: formData.get("spot") || undefined,
+    lot_code: formData.get("lot_code") || undefined,
     date_received: formData.get("date_received"),
     manufacture_date: formData.get("manufacture_date") || undefined,
     expiration_date: formData.get("expiration_date") || undefined,
@@ -283,7 +286,17 @@ export async function createIngredient(formData: FormData) {
     })
     .select("id")
     .single();
-  if (productErr) throw new Error(productErr.message);
+  if (productErr) {
+    // Uniqueness is now per (RM#, Inventory Type) — #146. Give a clear message
+    // instead of the raw Postgres constraint error on a duplicate.
+    if (productErr.code === "23505") {
+      throw new Error(
+        `An ingredient with RM# "${v.sku}" and this Inventory Type already exists. ` +
+          `The same RM# is only allowed once per Inventory Type.`,
+      );
+    }
+    throw new Error(productErr.message);
+  }
 
   // 3. First lot
   const { data: lot, error: lotErr } = await supabase
