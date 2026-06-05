@@ -106,6 +106,20 @@ export default async function ReportPage({
                     className="rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm text-gray-900 dark:text-gray-50 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 )}
+                {p.type === "select" && (
+                  <select
+                    name={p.name}
+                    defaultValue={(sp[p.name] ?? p.default) as string}
+                    className="rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm text-gray-900 dark:text-gray-50 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    <option value="">All</option>
+                    {p.options.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                )}
                 {p.type === "uuid" && (
                   <ProductPicker name={p.name} defaultValue={(sp[p.name] ?? "") as string} />
                 )}
