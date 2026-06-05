@@ -1,36 +1,7 @@
 "use client";
 
 import { useState } from "react";
-
-const INVENTORY_TYPES = ["RM Commercial", "RM Non-Commercial", "Finished Good", "Packaging"];
-const ALLERGENS = [
-  "Crustacean Shellfish",
-  "Eggs",
-  "Fish",
-  "Milk",
-  "None",
-  "Peanuts",
-  "Sesame",
-  "Soy",
-  "Tree Nuts",
-  "Wheat",
-];
-const CATEGORIES = [
-  "Antifoam",
-  "Color",
-  "Culture",
-  "Dairy",
-  "Emulsifier",
-  "Enzyme",
-  "Fat/Oil/Shortening",
-  "Flavor",
-  "Nutrient",
-  "pH Control Agent",
-  "Preservative",
-  "Protein",
-  "Stabilizer/Thickener",
-  "Sweetener",
-];
+import { INVENTORY_TYPES, ALLERGENS, CATEGORIES } from "@/lib/ingredient-options";
 
 export type RoomOption = { id: string; code: string; name: string };
 

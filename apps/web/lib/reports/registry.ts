@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { INVENTORY_TYPES, ALLERGENS, CATEGORIES } from "@/lib/ingredient-options";
 
 const today = () => new Date().toISOString().slice(0, 10);
 const thirtyDaysAgo = () => {
@@ -11,7 +12,8 @@ export type ReportParam =
   | { type: "date"; name: string; label: string; default: string }
   | { type: "uuid"; name: string; label: string; default: null }
   | { type: "number"; name: string; label: string; default: number; min: number; max: number }
-  | { type: "text"; name: string; label: string; default: string; optional: true };
+  | { type: "text"; name: string; label: string; default: string; optional: true }
+  | { type: "select"; name: string; label: string; default: string; options: readonly string[]; optional: true };
 
 export type ReportDef = {
   slug: string;
@@ -28,13 +30,25 @@ export const REPORTS: ReportDef[] = [
   {
     slug: "inventory-per-product",
     name: "Inventory by Ingredient",
-    description: "Current on-hand for every active ingredient in display units, with reorder status.",
+    description: "Current on-hand for every active ingredient in display units, with reorder status and ingredient details.",
     isAdminOnly: false,
-    params: [],
+    params: [
+      { type: "select", name: "p_inventory_type", label: "Inventory Type", default: "", options: INVENTORY_TYPES, optional: true },
+      { type: "select", name: "p_allergen", label: "Allergen", default: "", options: ALLERGENS, optional: true },
+      { type: "select", name: "p_category", label: "Category", default: "", options: CATEGORIES, optional: true },
+    ],
     rpcName: "report_inventory_per_product",
     columns: [
-      { key: "sku", label: "SKU" },
+      { key: "sku", label: "RM#" },
       { key: "name", label: "Ingredient" },
+      { key: "inventory_type", label: "Inventory Type" },
+      { key: "manufacturer", label: "Manufacturer" },
+      { key: "manufacturer_item_no", label: "Mfr Item #" },
+      { key: "broker", label: "Broker" },
+      { key: "broker_item_no", label: "Broker Item #" },
+      { key: "allergen", label: "Allergen" },
+      { key: "category", label: "Category" },
+      { key: "location", label: "Location" },
       { key: "on_hand_display", label: "On Hand", numeric: true },
       { key: "display_unit", label: "Unit" },
       { key: "reorder_point_display", label: "Reorder At", numeric: true },
@@ -51,7 +65,7 @@ export const REPORTS: ReportDef[] = [
     params: [],
     rpcName: "report_inventory_detailed",
     columns: [
-      { key: "sku", label: "SKU" },
+      { key: "sku", label: "RM#" },
       { key: "product_name", label: "Ingredient" },
       { key: "lot_code", label: "Lot" },
       { key: "expires_on", label: "Expires", date: true },
@@ -72,7 +86,7 @@ export const REPORTS: ReportDef[] = [
     ],
     rpcName: "report_physical_count_sheet",
     columns: [
-      { key: "sku", label: "SKU" },
+      { key: "sku", label: "RM#" },
       { key: "name", label: "Ingredient" },
       { key: "system_on_hand", label: "System Count", numeric: true },
       { key: "display_unit", label: "Unit" },
@@ -114,7 +128,7 @@ export const REPORTS: ReportDef[] = [
     rpcName: "report_movements_summary",
     columns: [
       { key: "day", label: "Day", date: true },
-      { key: "sku", label: "SKU" },
+      { key: "sku", label: "RM#" },
       { key: "product_name", label: "Ingredient" },
       { key: "n_check_ins", label: "Check-ins", numeric: true },
       { key: "n_check_outs", label: "Check-outs", numeric: true },
@@ -132,7 +146,7 @@ export const REPORTS: ReportDef[] = [
     params: [],
     rpcName: "report_low_stock",
     columns: [
-      { key: "sku", label: "SKU" },
+      { key: "sku", label: "RM#" },
       { key: "name", label: "Ingredient" },
       { key: "on_hand_display", label: "On Hand", numeric: true },
       { key: "reorder_point_display", label: "Reorder At", numeric: true },
@@ -155,7 +169,7 @@ export const REPORTS: ReportDef[] = [
       { key: "days_until_expiry", label: "Days", numeric: true },
       { key: "is_expired", label: "Expired" },
       { key: "lot_code", label: "Lot" },
-      { key: "sku", label: "SKU" },
+      { key: "sku", label: "RM#" },
       { key: "product_name", label: "Ingredient" },
       { key: "on_hand_display", label: "On Hand", numeric: true },
       { key: "display_unit", label: "Unit" },
@@ -171,7 +185,7 @@ export const REPORTS: ReportDef[] = [
     ],
     rpcName: "report_dead_stock",
     columns: [
-      { key: "sku", label: "SKU" },
+      { key: "sku", label: "RM#" },
       { key: "name", label: "Ingredient" },
       { key: "on_hand_display", label: "On Hand", numeric: true },
       { key: "display_unit", label: "Unit" },

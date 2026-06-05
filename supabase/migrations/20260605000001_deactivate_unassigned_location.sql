@@ -1,0 +1,17 @@
+-- #143 / #145: Remove the default "Unassigned" (code OT) location.
+--
+-- 20260527000004_room_codes_update.sql seeded an active locations row
+-- (code 'OT', name 'Unassigned'). This caused two problems:
+--   #143: "Unassigned" showed up as a selectable option in the New Ingredient
+--         LOCATION dropdown, even though the "Other" free-text option now
+--         covers that case.
+--   #145: report_inventory_by_location already synthesizes its own
+--         "Unassigned" rollup bucket for products with no location, so the
+--         seeded OT room appeared as a duplicate "Unassigned" row.
+--
+-- We deactivate rather than delete the row, because sub_locations.location_id
+-- references locations with ON DELETE RESTRICT and existing products may still
+-- point at it. The New Ingredient dropdown query and the report's `rooms` CTE
+-- both filter on is_active = true, so deactivating removes it from both
+-- surfaces while preserving referential integrity.
+update locations set is_active = false where code = 'OT';
