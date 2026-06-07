@@ -10,13 +10,27 @@ Single source of truth for landmines, conventions, and known issues across `supa
 
 ## Known landmines (verified bites)
 
-_None recorded yet. Add real ones here when they bite a second time. Format: location (file:line or package), symptom, recipe._
+_Format: location (file:line or package), symptom, recipe._
 
-<!-- Example shape:
-### RLS recursion on `inventory_movements`
-**Location:** `supabase/migrations/2026xxxxxxxx_movements_rls.sql`
-The policy references its own table inside the USING clause. Symptom: 500 with `infinite recursion in policy`. Any new movement policy must not self-reference.
--->
+### On-hand fan-out: never join both `movements` and `lots` to `products` in one aggregate
+**Location:** report RPCs in `supabase/migrations/*_reports.sql` (originally `report_inventory_per_product`); fixed in `20260605000002_fix_inventory_per_product_fanout.sql` and carried forward in `20260605000004_inventory_per_product_fields_filters.sql`.
+
+`products` has two independent one-to-many children: `movements` (the stock ledger) and `lots`. If a query joins **both** to `products` to compute a stock sum *and* a lot count in the same `GROUP BY p.id`, the two children cross-join — every movement row is duplicated once per lot. `sum(m.base_quantity)` then comes out multiplied by the lot count (a product with two 480oz lots reported 1920oz instead of 960oz — OpenProject #155/#156).
+
+**Recipe:** keep the movement aggregation as the only join; compute the lot count (or any lot-derived scalar) with a correlated subquery instead of a second join:
+```sql
+-- WRONG: lots join fans out the movement sum
+left join movements m on m.product_id = p.id and m.movement_type <> 'void'
+left join lots     l on l.product_id = p.id and l.is_archived = false
+... count(distinct l.id) as lot_count ... group by p.id
+
+-- RIGHT: movements is the only join; lot_count via subquery
+left join movements m on m.product_id = p.id and m.movement_type <> 'void'
+... (select count(*) from lots l
+       where l.product_id = p.id and l.is_archived = false) as lot_count
+... group by p.id
+```
+Generalizes to any report touching two sibling child tables of `products` at once. `count(distinct l.id)` masks the bug — it stays correct under the fan-out, so the lot count looks right while the quantities are silently inflated. The chat tools dodge this by reading the pre-aggregated `product_stock`/`lot_stock` views, which each group a single child table.
 
 ---
 
