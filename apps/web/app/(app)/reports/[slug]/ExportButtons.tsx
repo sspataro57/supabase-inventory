@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { exportCsv, exportPdf } from "./actions";
 import type { ReportParams } from "@/lib/reports/registry";
 
 export function ExportButtons({ slug, params }: { slug: string; params: ReportParams }) {
@@ -10,7 +9,15 @@ export function ExportButtons({ slug, params }: { slug: string; params: ReportPa
   async function download(type: "csv" | "pdf") {
     setLoading(type);
     try {
-      const res = await (type === "csv" ? exportCsv(slug, params) : exportPdf(slug, params));
+      const qs = new URLSearchParams();
+      for (const [key, value] of Object.entries(params)) {
+        if (value !== null && value !== undefined && value !== "") qs.set(key, String(value));
+      }
+      qs.set("format", type);
+
+      const res = await fetch(`/api/reports/${slug}/export?${qs.toString()}`);
+      if (!res.ok) throw new Error(await res.text());
+
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
